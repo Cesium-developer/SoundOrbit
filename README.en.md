@@ -1,5 +1,6 @@
 # SoundOrbit (Realtime Surround)
 
+[![Latest Release](https://img.shields.io/github/v/release/Cesium-developer/SoundOrbit?display_name=tag)](https://github.com/Cesium-developer/SoundOrbit/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2010%2B-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/language-Java-orange.svg)](https://www.java.com)
@@ -84,6 +85,10 @@ Push a tag starting with `v` (e.g. `git tag v0.1.0 && git push origin v0.1.0`). 
 ## Contributing
 
 Issues and pull requests are welcome. Please make sure `./gradlew :app:assembleDebug` passes before submitting; for changes to the audio algorithms or ROM compatibility, include notes on how you verified them.
+
+## AI disclosure
+
+This project was built with the help of an AI assistant using the model **hy4 flash**. The author defined the requirements, made the design decisions, tested on real devices, and reviewed the final result. All features were verified on actual hardware; the audio algorithms and device compatibility are based on real-world testing.
 
 ## License
 

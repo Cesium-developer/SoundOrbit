@@ -2,6 +2,7 @@
 
 [English](README.en.md)
 
+[![Latest Release](https://img.shields.io/github/v/release/Cesium-developer/SoundOrbit?display_name=tag)](https://github.com/Cesium-developer/SoundOrbit/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Android%2010%2B-green.svg)](https://developer.android.com)
 [![Java](https://img.shields.io/badge/language-Java-orange.svg)](https://www.java.com)
@@ -84,6 +85,10 @@ IDE 直接打开工程根目录即可（Android Studio）。
 ## 贡献
 
 欢迎 Issue 与 Pull Request。提交前请确保 `./gradlew :app:assembleDebug` 通过；对音频算法或 ROM 兼容性的改进请附上实测说明。
+
+## AI 生成说明
+
+本项目的代码由 AI 助手协助生成，使用模型 **hy4 flash**。作者负责需求定义、方案决策、真机实测与最终审查；所有功能均经实际设备验证，音频算法与系统兼容性以实测为准。
 
 ## 许可
 
