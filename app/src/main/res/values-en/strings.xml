@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SoundOrbit</string>
+    <string name="main_title">SoundOrbit</string>
+    <string name="main_subtitle">Turn mono into two-ear orbiting in real time · Made for ASMR, not limited to it</string>
+    <string name="capture_authorized">Audio capture authorized</string>
+    <string name="capture_unauthorized">Not authorized (tap to authorize)</string>
+    <string name="tile_label">SoundOrbit</string>
+    <string name="depth_label">Depth (amplitude, suggested 20)</string>
+    <string name="period_label">Period (seconds, suggested 20)</string>
+    <string name="period_random_enable">Random period range (when checked, the period becomes a range and each cycle picks a random value within it)</string>
+    <string name="period_random_min">Period lower bound (seconds)</string>
+    <string name="period_random_max">Period upper bound (seconds)</string>
+    <string name="period_random_bad">Invalid period range</string>
+    <string name="err_min_not_number">Lower bound is not a valid number</string>
+    <string name="err_max_not_number">Upper bound is not a valid number</string>
+    <string name="err_min_not_positive">Lower bound must be greater than 0</string>
+    <string name="err_max_not_positive">Upper bound must be greater than 0</string>
+    <string name="err_max_less_than_min">Upper bound must not be less than lower bound</string>
+    <string name="err_capture_denied">Audio capture permission not granted</string>
+    <string name="err_get_capture_failed">Failed to acquire capture permission: %s</string>
+    <string name="err_capture_not_authorized">Please authorize audio capture first</string>
+    <string name="err_record_init_failed">Recorder initialization failed</string>
+    <string name="err_track_init_failed">Player initialization failed</string>
+    <string name="err_start_failed">Start failed: %s</string>
+    <string name="ratio_label">Side/center time ratio (1 = original; higher lingers at the sides, lower at the center)</string>
+    <string name="enable">Enable surround</string>
+    <string name="disable">Disable surround</string>
+    <string name="status_idle">Status: idle</string>
+    <string name="status_running">Status: running</string>
+    <string name="notification_title">Surround is running</string>
+    <string name="notification_text">Processing system output audio</string>
+    <string name="headset_hint">Headphones recommended (phone speakers are usually mono, which weakens the effect)</string>
+    <string name="status_failed">Status: failed to start</string>
+    <string name="status_advanced_failed">Status: advanced engine failed to start (%s)</string>
+    <string name="status_advanced_running">Status: running (advanced engine)</string>
+    <string name="period_random_reenter">, please re-enter</string>
+    <string name="warn_channel">Surround reminder</string>
+    <string name="warn_not_stereo_title">Current output is not stereo</string>
+    <string name="warn_not_stereo_text">Surround needs a stereo output — headphones recommended, then re-enable</string>
+    <string name="copy_diag">Copy diagnostics</string>
+
+    <string name="engine_label">Engine</string>
+    <string name="engine_native">Lightweight (session 0, zero latency, L/R panning)</string>
+    <string name="engine_shizuku">Advanced (capture-based, panning / binaural)</string>
+    <string name="channel_label">Surround mode (advanced engine only)</string>
+    <string name="channel_left">Panning · take left → both ears (channel duplication + L/R gain swing, no front/back)</string>
+    <string name="channel_right">Panning · take right → both ears (channel duplication + L/R gain swing, no front/back)</string>
+    <string name="channel_mix">Panning · stereo downmixed to mono → both ears (downmix then swing)</string>
+    <string name="channel_hrtf">Binaural · stereo direct (L and R orbit independently)</string>
+    <string name="channel_hrtf_left">Binaural · take left source (mono orbiting)</string>
+    <string name="channel_hrtf_right">Binaural · take right source (mono orbiting)</string>
+    <string name="channel_hrtf_mix">Binaural · stereo downmixed to mono orbiting (downmix then orbit)</string>
+    <string name="hrtf_params">Binaural parameters (rotation uses the "Period" field above; Depth and Ratio have no effect here)</string>
+    <string name="hrtf_azimuth">Start azimuth (degrees, 0 front / 90 right / 180 back / 270 left)</string>
+    <string name="hrtf_radius">Radius (0 close to head ~ 1 far; smaller = stronger binaural cues)</string>
+    <string name="hrtf_elevation">Elevation (degrees, -60 to 60)</string>
+    <string name="shizuku_status">Capture authorization</string>
+    <string name="shizuku_ok">Ready</string>
+    <string name="shizuku_not_installed">Not available</string>
+    <string name="shizuku_need_auth">Authorization needed</string>
+    <string name="shizuku_auth">Authorize audio capture</string>
+    <string name="shizuku_note">The advanced engine needs "record screen/audio" authorization (Android 10+ capture API); Bluetooth headphones work too; about 80–120 ms latency. Panning = duplicate a channel and swing L/R gains; binaural = orbit a source using binaural cues. The lightweight engine has zero latency but only L/R panning.</string>
+    <string name="channel_name">Surround service</string>
+    <string name="settings_title">Settings &amp; keep-alive</string>
+    <string name="github_repo">View source on GitHub</string>
+    <string name="main_note">Lightweight engine: adjusts system output gains in real time, no capture or replay, zero latency and no doubling; L/R panning — defaults 20 / 20 / 1 work immediately.\nAdvanced engine: captures and re-plays processed audio (original muted, ~80–120 ms latency), with panning (mono + swing) or binaural (spatialized orbiting) options.</string>
+
+    <string name="settings_battery">Ignore battery optimization</string>
+    <string name="settings_battery_desc">Recommended, reduces the chance of the system freezing the background service</string>
+    <string name="settings_accessibility">Accessibility keep-alive (optional)</string>
+    <string name="settings_accessibility_desc">Makes it harder for the system to kill the process with an accessibility service; optional, up to you</string>
+    <string name="settings_lock">Lock in recents</string>
+    <string name="settings_lock_desc">In the recent-apps view, drag this app\'s card down and tap "Lock" to prevent one-tap clearing</string>
+    <string name="settings_language">App language</string>
+    <string name="lang_follow_system">Follow system</string>
+    <string name="lang_chinese">简体中文</string>
+    <string name="lang_english">English</string>
+    <string name="settings_diag">Diagnostics</string>
+    <string name="settings_diag_desc">Check whether the effect is attached, parameters, Android version, etc.</string>
+    <string name="settings_mono">Pre-convert stereo to mono</string>
+    <string name="settings_mono_desc">The system\'s accessibility "mono audio" merges channels at the final output stage, which also cancels this effect\'s L/R panning and makes the output mono — so it is not suitable</string>
+    <string name="err_no_global_effect">Global effect unsupported, or output chain incompatible</string>
+    <string name="err_no_audio_permission">Missing system audio settings permission</string>
+    <string name="err_unknown">Unknown error</string>
+    <string name="notification_failed">Start failed: %s</string>
+    <string name="notification_params">Depth %s  Period %ss  Ratio %s</string>
+    <string name="diag_device">Device: </string>
+    <string name="diag_effect_running">Effect running: </string>
+    <string name="diag_current_params">Current params: depth=</string>
+    <string name="diag_battery">Battery whitelist: </string>
+    <string name="diag_joined">joined</string>
+    <string name="diag_not_joined">not joined</string>
+    <string name="diag_a11y">Accessibility keep-alive: </string>
+    <string name="diag_on">on</string>
+    <string name="diag_off">off</string>
+    <string name="diag_global_effect">Global effect: DynamicsProcessing / session 0</string>
+    <string name="diag_mono">Pre-convert mono: not supported (see note below)</string>
+    <string name="capture_channel">Audio capture</string>
+    <string name="capture_notif_title">Capturing audio</string>
+    <string name="capture_notif_text">For realtime surround processing</string>
+</resources>

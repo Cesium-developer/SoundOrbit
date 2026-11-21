@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_entries">
+        <item>@string/lang_follow_system</item>
+        <item>@string/lang_chinese</item>
+        <item>@string/lang_english</item>
+    </string-array>
+
+    <string-array name="channel_modes">
+        <item>@string/channel_left</item>
+        <item>@string/channel_right</item>
+        <item>@string/channel_mix</item>
+        <item>@string/channel_hrtf</item>
+        <item>@string/channel_hrtf_left</item>
+        <item>@string/channel_hrtf_right</item>
+        <item>@string/channel_hrtf_mix</item>
+    </string-array>
+</resources>

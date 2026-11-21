@@ -1,0 +1,27 @@
+# Gradle / Android 构建产物
+.gradle/
+build/
+app/build/
+*.apk
+
+# 本地 SDK 路径（含本机绝对路径，严禁提交）
+local.properties
+
+# IDE
+.idea/
+*.iml
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 签名密钥（绝对不能提交）
+*.jks
+*.keystore
+*.jks.bak
+keystore.properties
+keystore-secret.txt

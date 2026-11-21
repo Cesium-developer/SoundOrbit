@@ -1,0 +1,61 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.surroundinsert'
+    compileSdk 34
+    buildToolsVersion '34.0.0'
+
+    defaultConfig {
+        applicationId 'com.example.surroundinsert'
+        minSdk 29
+        targetSdk 34
+        versionCode 1
+        versionName '0.1.0'
+    }
+
+    signingConfigs {
+        release {
+            // CI 从 GitHub Secrets 注入；本地未配置时为空，构建退化为 debug 签名
+            def ks = System.getenv("SIGN_KEYSTORE")
+            if (ks != null && ks != "") {
+                storeFile file(ks)
+                storePassword System.getenv("SIGN_STORE_PASSWORD")
+                keyAlias System.getenv("SIGN_KEY_ALIAS")
+                keyPassword System.getenv("SIGN_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // 仅当 CI 注入签名密钥时用正式签名；本地无密钥则构建 unsigned（可自行签名）
+            def ks = System.getenv("SIGN_KEYSTORE")
+            if (ks != null && ks != "") {
+                signingConfig signingConfigs.release
+            }
+            lintOptions {
+                checkReleaseBuilds false
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    // appcompat 1.7 自带 kotlin-stdlib 1.8，统一旧传递依赖避免重复类
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+}
+
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
