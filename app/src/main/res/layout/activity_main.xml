@@ -43,7 +43,7 @@
                 android:textSize="16sp"
                 android:textColor="#263238" />
 
-            <com.example.surroundinsert.SurroundVisualizerView
+            <io.github.cesiumdeveloper.soundorbit.SurroundVisualizerView
                 android:id="@+id/visualizer"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"

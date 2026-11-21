@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import android.Manifest;
 import android.app.Activity;

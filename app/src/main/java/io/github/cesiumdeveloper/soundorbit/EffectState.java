@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 /**
  * 引擎与 UI 之间的只读快照。引擎每帧写入，UI 定时读取，避免跨进程/跨线程耦合。

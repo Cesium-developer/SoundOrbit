@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -19,10 +19,10 @@ import java.util.Locale;
 
 public class SurroundService extends Service {
     private static final String TAG = "SurroundService";
-    public static final String ACTION_PREPARE = "com.example.surroundinsert.PREPARE";
-    public static final String ACTION_START = "com.example.surroundinsert.START";
-    public static final String ACTION_STOP = "com.example.surroundinsert.STOP";
-    public static final String ACTION_UPDATE = "com.example.surroundinsert.UPDATE";
+    public static final String ACTION_PREPARE = "io.github.cesiumdeveloper.soundorbit.PREPARE";
+    public static final String ACTION_START = "io.github.cesiumdeveloper.soundorbit.START";
+    public static final String ACTION_STOP = "io.github.cesiumdeveloper.soundorbit.STOP";
+    public static final String ACTION_UPDATE = "io.github.cesiumdeveloper.soundorbit.UPDATE";
     public static final String EXTRA_DEPTH = "depth";
     public static final String EXTRA_PERIOD = "period";
     public static final String EXTRA_RATIO = "ratio";
@@ -201,12 +201,12 @@ public class SurroundService extends Service {
     private static String friendlyError(android.content.Context c, Throwable t) {
         String m = t == null ? "" : String.valueOf(t.getMessage());
         if (m.contains("Cannot initialize effect")) {
-            return c.getString(com.example.surroundinsert.R.string.err_no_global_effect);
+            return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_no_global_effect);
         }
         if (m.contains("SecurityException") || m.contains("permission")) {
-            return c.getString(com.example.surroundinsert.R.string.err_no_audio_permission);
+            return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_no_audio_permission);
         }
-        return m.isEmpty() ? c.getString(com.example.surroundinsert.R.string.err_unknown) : m;
+        return m.isEmpty() ? c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_unknown) : m;
     }
 
     private void stopEngine() {

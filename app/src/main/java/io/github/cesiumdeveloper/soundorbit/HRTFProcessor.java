@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 /**
  * 真环绕声（双耳空间化）处理器：把一个单声道源渲染成绕头移动的空间音频。

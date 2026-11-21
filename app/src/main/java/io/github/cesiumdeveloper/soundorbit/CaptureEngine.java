@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import android.app.Activity;
 import android.content.Context;
@@ -82,7 +82,7 @@ public final class CaptureEngine {
     /** 在 Activity.onActivityResult 里调用 */
     public void onAuthorizationResult(Context c, int resultCode, Intent data) {
         if (resultCode != Activity.RESULT_OK || data == null) {
-            lastError = app.getString(com.example.surroundinsert.R.string.err_capture_denied);
+            lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_capture_denied);
             if (authCallback != null) authCallback.run();
             return;
         }
@@ -105,7 +105,7 @@ public final class CaptureEngine {
                 lastError = null;
                 Log.i(TAG, "media projection acquired");
             } catch (Throwable t) {
-                lastError = app.getString(com.example.surroundinsert.R.string.err_get_capture_failed, String.valueOf(t.getMessage()));
+                lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_get_capture_failed, String.valueOf(t.getMessage()));
                 Log.e(TAG, "getMediaProjection failed", t);
             }
             if (authCallback != null) authCallback.run();
@@ -133,7 +133,7 @@ public final class CaptureEngine {
             return 0;
         }
         if (projection == null) {
-            lastError = app.getString(com.example.surroundinsert.R.string.err_capture_not_authorized);
+            lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_capture_not_authorized);
             return -1;
         }
         depth = d;
@@ -167,7 +167,7 @@ public final class CaptureEngine {
                     .setAudioPlaybackCaptureConfig(cfg)
                     .build();
             if (rec.getState() != AudioRecord.STATE_INITIALIZED) {
-                lastError = app.getString(com.example.surroundinsert.R.string.err_record_init_failed);
+                lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_record_init_failed);
                 rec.release();
                 rec = null;
                 return -2;
@@ -188,7 +188,7 @@ public final class CaptureEngine {
                     .setTransferMode(AudioTrack.MODE_STREAM)
                     .build();
             if (track.getState() != AudioTrack.STATE_INITIALIZED) {
-                lastError = app.getString(com.example.surroundinsert.R.string.err_track_init_failed);
+                lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_track_init_failed);
                 rec.release();
                 rec = null;
                 track.release();
@@ -219,7 +219,7 @@ public final class CaptureEngine {
             }, 1000);
             return 0;
         } catch (Throwable t) {
-            lastError = app.getString(com.example.surroundinsert.R.string.err_start_failed, String.valueOf(t.getMessage()));
+            lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_start_failed, String.valueOf(t.getMessage()));
             Log.e(TAG, "start failed", t);
             muteMedia(false);
             return -1;

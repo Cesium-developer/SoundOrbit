@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -17,7 +17,7 @@ public class CaptureFgService extends Service {
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null && android.os.Build.VERSION.SDK_INT >= 26) {
             nm.createNotificationChannel(new NotificationChannel(
-                    CHANNEL, getString(com.example.surroundinsert.R.string.capture_channel), NotificationManager.IMPORTANCE_LOW));
+                    CHANNEL, getString(io.github.cesiumdeveloper.soundorbit.R.string.capture_channel), NotificationManager.IMPORTANCE_LOW));
         }
     }
 
@@ -25,8 +25,8 @@ public class CaptureFgService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Notification n = new Notification.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_surround)
-                .setContentTitle(getString(com.example.surroundinsert.R.string.capture_notif_title))
-                .setContentText(getString(com.example.surroundinsert.R.string.capture_notif_text))
+                .setContentTitle(getString(io.github.cesiumdeveloper.soundorbit.R.string.capture_notif_title))
+                .setContentText(getString(io.github.cesiumdeveloper.soundorbit.R.string.capture_notif_text))
                 .build();
         startForeground(2001, n);
         return START_STICKY;

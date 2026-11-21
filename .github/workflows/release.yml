@@ -40,7 +40,18 @@ jobs:
       - name: Stamp version from tag
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          CODE=$(echo "$GITHUB_REF_NAME" | grep -oE '[0-9]+' | paste -sd'' -)
+          # 标准 semver：versionCode = MAJOR*10000 + MINOR*100 + PATCH
+          # 单调递增、无碰撞，各段需 < 100
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          if ! [[ "$MAJOR" =~ ^[0-9]+$ && "$MINOR" =~ ^[0-9]+$ && "$PATCH" =~ ^[0-9]+$ ]]; then
+            echo "tag 不是标准的 MAJOR.MINOR.PATCH 格式: $VERSION" >&2
+            exit 1
+          fi
+          if (( MAJOR >= 100 || MINOR >= 100 || PATCH >= 100 )); then
+            echo "版本号各段必须小于 100: $VERSION" >&2
+            exit 1
+          fi
+          CODE=$(( MAJOR * 10000 + MINOR * 100 + PATCH ))
           echo "versionName=$VERSION versionCode=$CODE"
           sed -i "s/versionCode [0-9]*/versionCode $CODE/" app/build.gradle
           sed -i "s/versionName '[^']*'/versionName '$VERSION'/" app/build.gradle

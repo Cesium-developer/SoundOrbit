@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import java.util.Random;
 
@@ -80,16 +80,16 @@ public final class PeriodRandomizer {
         try {
             lo = Float.parseFloat(minText.trim());
         } catch (Throwable t) {
-            return c.getString(com.example.surroundinsert.R.string.err_min_not_number);
+            return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_min_not_number);
         }
         try {
             hi = Float.parseFloat(maxText.trim());
         } catch (Throwable t) {
-            return c.getString(com.example.surroundinsert.R.string.err_max_not_number);
+            return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_not_number);
         }
-        if (lo <= 0f) return c.getString(com.example.surroundinsert.R.string.err_min_not_positive);
-        if (hi <= 0f) return c.getString(com.example.surroundinsert.R.string.err_max_not_positive);
-        if (hi < lo) return c.getString(com.example.surroundinsert.R.string.err_max_less_than_min);
+        if (lo <= 0f) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_min_not_positive);
+        if (hi <= 0f) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_not_positive);
+        if (hi < lo) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_less_than_min);
         return null;
     }
 }

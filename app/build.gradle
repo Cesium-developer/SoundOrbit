@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    namespace 'com.example.surroundinsert'
+    namespace 'io.github.cesiumdeveloper.soundorbit'
     compileSdk 34
     buildToolsVersion '34.0.0'
 
     defaultConfig {
-        applicationId 'com.example.surroundinsert'
+        applicationId 'io.github.cesiumdeveloper.soundorbit'
         minSdk 29
         targetSdk 34
         versionCode 1
@@ -28,6 +28,11 @@ android {
         }
     }
 
+    // 发布构建跳过 lint（CI 无需下载 lint-gradle 依赖；本地可用 ./gradlew lint 单独检查）
+    lint {
+        checkReleaseBuilds false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -35,9 +40,6 @@ android {
             def ks = System.getenv("SIGN_KEYSTORE")
             if (ks != null && ks != "") {
                 signingConfig signingConfigs.release
-            }
-            lintOptions {
-                checkReleaseBuilds false
             }
         }
     }

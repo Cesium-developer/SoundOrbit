@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.Activity;

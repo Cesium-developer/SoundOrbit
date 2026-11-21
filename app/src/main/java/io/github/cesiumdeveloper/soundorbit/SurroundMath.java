@@ -1,4 +1,4 @@
-package com.example.surroundinsert;
+package io.github.cesiumdeveloper.soundorbit;
 
 /** 两个引擎共用的增益算法：反相三角波 + 时间比变形。改这里 = 两个引擎一起改。 */
 public final class SurroundMath {
