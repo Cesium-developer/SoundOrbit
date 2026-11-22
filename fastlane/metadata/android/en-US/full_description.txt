@@ -2,12 +2,12 @@ SoundOrbit processes audio in real time so it appears to move around your head a
 
 Two engines, pick what fits:
 
-* Zero-latency mode attaches an effect to the system output mix and modulates left/right gains with an anti-phase triangle wave. No capture, no replay, no echo, no extra buffering. Depth, period, side/center time ratio, and a random period range are adjustable.
-* Spatial audio mode captures what other apps are playing, then renders a binaural field with ITD (interaural time difference), ILD (interaural level difference), head-shadow low-pass, and pinna notches. Sources orbit in azimuth, elevation, and distance. About 80–120 ms latency; requires a one-time "record screen/audio" permission.
+* Lightweight (session 0, zero latency, left/right sweep): attaches an effect to the system output mix and modulates left/right gains with an anti-phase triangle wave. No capture, no replay, no echo, no extra buffering. Depth, period, side/center time ratio, and a random period range are adjustable.
+* Advanced (capture, pseudo / true surround): captures what other apps are playing, then renders a binaural field with ITD (interaural time difference), ILD (interaural level difference), head-shadow low-pass, and pinna notches. Sources orbit in azimuth, elevation, and distance. Capture and replay introduce some latency; requires a one-time "record screen/audio" permission.
 
 Seven surround modes: pseudo-surround (take left / take right / stereo downmix, each to both ears), and binaural (stereo direct with two independently orbiting sources, take-left source, take-right source, stereo downmix source).
 
-Audio controls (spatial audio mode): soft limiter (prevents clipping, on by default), 10-band graphic EQ (ISO octave frequencies, custom presets), and psychoacoustic bass enhancement (off by default). A live visualization switches between a panning view and a top-down head view showing source azimuth, elevation, and motion trail. While surround is on, sound-affecting settings are locked to avoid accidental changes during playback.
+Audio controls (Advanced engine): soft limiter (prevents clipping, on by default), 10-band graphic EQ (ISO octave frequencies, custom presets), and psychoacoustic bass enhancement (off by default). A live visualization switches between a panning view and a top-down head view showing source azimuth, elevation, and motion trail. While surround is on, sound-affecting settings are locked to avoid accidental changes during playback.
 
 Good for: binaural ASMR, adding motion to ordinary music, and streaming audio you cannot download locally.
 
