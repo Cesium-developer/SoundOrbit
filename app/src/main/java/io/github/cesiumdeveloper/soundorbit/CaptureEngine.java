@@ -49,6 +49,11 @@ public final class CaptureEngine {
     private volatile float hrtfRadius = 0.5f;   // 半径 0~1，越小越贴头
     private volatile float hrtfElevation = 0f;  // 仰角，度
     private volatile HrtfParams hrtfParams = HrtfParams.defaults(); // 发烧友参数
+    private final SoftLimiter outputLimiter = new SoftLimiter(); // 伪环绕输出软限幅
+    private final GraphicEQ eq = new GraphicEQ(); // 10段图示均衡器
+    private final BassEnhancer bass = new BassEnhancer(); // C: 低音增强
+    { eq.setLimiter(outputLimiter); } // EQ 输出共用软限幅兜底
+    private volatile float softThreshold = SoftLimiter.DEFAULT_THRESHOLD;
 
     private volatile String lastError;
     private HRTFProcessor hrtf;
@@ -206,6 +211,7 @@ public final class CaptureEngine {
             // 静音媒体 stream 掐掉原声（实测静音不影响 capture），只播处理后的 ASSISTANT 流
             muteMedia(true);
             running = true;
+            EngineGuard.setCaptureRunning(true);
             worker = new Thread(() -> loop(frames), "capture-engine");
             worker.start();
             rec.startRecording();
@@ -257,6 +263,13 @@ public final class CaptureEngine {
             app.stopService(new Intent(app, CaptureFgService.class));
         } catch (Throwable ignored) {
         }
+    }
+
+    /** 在写出前应用 10 段 EQ；全 0dB 时 GraphicEQ 内部直接跳过 */
+    private void applyEq(short[] buf, short[] out, int frames) {
+        if (eq.isNeutral()) return;
+        eq.process(buf, out, frames);
+        System.arraycopy(out, 0, buf, 0, frames * 2);
     }
 
     /** 写 AudioTrack 并检查返回值；DEAD_OBJECT 等错误时让引擎停止并上报，而非静默空转 */
@@ -372,10 +385,12 @@ public final class CaptureEngine {
         if (!isHrtf(mode)) return;
         if (force || hrtf == null) {
             hrtf = new HRTFProcessor();
+            hrtf.setSoftThreshold(softThreshold);
             hrtf.reset();
         }
         if (mode == MODE_HRTF_STEREO && (force || hrtfR == null)) {
             hrtfR = new HRTFProcessor();
+            hrtfR.setSoftThreshold(softThreshold);
             hrtfR.reset();
         }
     }
@@ -383,6 +398,24 @@ public final class CaptureEngine {
     /** 发烧友参数（运行中可改，下一帧生效） */
     public void setHrtfParams(HrtfParams params) {
         this.hrtfParams = (params == null) ? HrtfParams.defaults() : params;
+    }
+
+    /** 设置 EQ 各段增益(dB)，运行中可改 */
+    public void setEqBands(float[] bandsDb) {
+        eq.setBands(bandsDb);
+    }
+
+    /** C: 低音增强强度 0~1（0=关闭） */
+    public void setBassStrength(float strength) {
+        bass.setStrength(strength);
+    }
+
+    /** 软限幅阈值（运行中可改），同时传给真环绕的 HRTF 实例 */
+    public void setSoftThreshold(float threshold) {
+        outputLimiter.setThreshold(threshold);
+        softThreshold = outputLimiter.getThreshold(); // 取钳制后的实际值
+        if (hrtf != null) hrtf.setSoftThreshold(softThreshold);
+        if (hrtfR != null) hrtfR.setSoftThreshold(softThreshold);
     }
 
     /** 设置周期随机配置（start 前或运行中均可） */
@@ -409,6 +442,7 @@ public final class CaptureEngine {
         short[] monoL = new short[frames];
         short[] monoR = new short[frames];
         short[] outR = new short[frames * 2];
+        short[] eqOut = new short[frames * 2];
         long startNs = System.nanoTime();
         long diagAt = 0;
         int diagInPeak = 0;
@@ -455,16 +489,22 @@ public final class CaptureEngine {
                         hrtf.processByPhase(src, buf, sampleFrames, phase,
                                 hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams);
                     }
-                    // 可视化：真环绕声用相位表达旋转进度，增益固定 1
+                    // 可视化：真环绕画声源绕头方位（起始方位 + 360°*相位）
                     EffectState.phase = (float) phase;
                     EffectState.tri = (float) phase;
                     EffectState.gainL = 1f;
                     EffectState.gainR = 1f;
+                    EffectState.hrtfMode = true;
+                    EffectState.srcAzimuth = hrtfAzimuth + (float) (phase * 360.0);
+                    EffectState.srcElevation = hrtfElevation;
+                    EffectState.dualSource = (mode == MODE_HRTF_STEREO);
                     EffectState.depth = depth;
                     EffectState.period = period;
                     EffectState.ratio = ratio;
                     EffectState.active = true;
                     EffectState.lastUpdateNs = System.nanoTime();
+                    applyEq(buf, eqOut, sampleFrames);
+                    bass.process(buf, sampleFrames); // C: 低音增强(strength=0时零开销)
                     if (!writeTrack(buf, sampleFrames * 2)) break;
                     continue;
                 }
@@ -475,6 +515,7 @@ public final class CaptureEngine {
                 float linR = SurroundMath.toLinearCapture(g[1], depth);
 
                 // 更新可视化快照（与音频同帧，比 20ms 轮询更准）
+                EffectState.hrtfMode = false;
                 EffectState.tri = g[2];
                 EffectState.phase = g[3];
                 EffectState.gainL = linL;
@@ -501,8 +542,9 @@ public final class CaptureEngine {
                         // 双声道合成一个声道后再用伪环绕算法处理
                         l = r = clampSample((l + r) * 0.5f);
                     }
-                    buf[i * 2] = clampSample(l * linL);
-                    buf[i * 2 + 1] = clampSample(r * linR);
+                    // 输出用软限幅：short/32768 归一化后处理，再转回 short。
+                    buf[i * 2] = outputLimiter.limitToShort((l / 32768f) * linL);
+                    buf[i * 2 + 1] = outputLimiter.limitToShort((r / 32768f) * linR);
                 }
                 // 诊断：处理后写出的峰值
                 for (int i = 0; i < sampleFrames * 2; i += 16) {
@@ -510,6 +552,8 @@ public final class CaptureEngine {
                     if (a > diagOutPeak) diagOutPeak = a;
                 }
                 diagWrites++;
+                applyEq(buf, eqOut, sampleFrames);
+                bass.process(buf, sampleFrames); // C: 低音增强
                 if (!writeTrack(buf, sampleFrames * 2)) break;
 
                 long now = System.currentTimeMillis();
@@ -534,6 +578,7 @@ public final class CaptureEngine {
             // 无论正常退出、write 失败还是异常，都释放资源并清运行状态，
             // 避免"无声但 UI 显示运行中"。stop() 是幂等的，重复调用无害。
             running = false;
+            EngineGuard.setCaptureRunning(false);
             EffectState.active = false;
             releaseAudioResources();
         }

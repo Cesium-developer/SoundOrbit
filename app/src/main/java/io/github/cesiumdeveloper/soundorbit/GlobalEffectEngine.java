@@ -35,6 +35,7 @@ public class GlobalEffectEngine {
             float gL = g[0];
             float gR = g[1];
 
+            EffectState.hrtfMode = false;
             EffectState.tri = g[2];
             EffectState.phase = g[3];
             EffectState.gainL = gL;

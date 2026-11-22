@@ -98,9 +98,16 @@
     <string name="capture_channel">音频捕获</string>
     <string name="capture_notif_title">正在捕获音频</string>
     <string name="capture_notif_text">用于实时环绕声处理</string>
-    <string name="settings_advanced">发烧友参数（高级）</string>
+    <string name="settings_advanced">发烧友参数 · HRTF（高级）</string>
     <string name="settings_advanced_warn">警告：仅发烧友专用。错误取值会导致定位错乱或音量异常，改坏可点"恢复默认"。</string>
-    <string name="settings_advanced_hint">以下为双耳渲染的底层参数，默认值即推荐值。修改后返回主界面生效。</string>
+    <string name="settings_advanced_hint">以下为双耳空间渲染（HRTF）的底层参数，默认值即推荐值。修改后返回主界面生效。</string>
+    <string name="dsp_toggle">DSP 设置（高级）</string>
+    <string name="dsp_sub_output">输出处理 · 软限幅</string>
+    <string name="dsp_sub_hrtf">HRTF 设置（空间渲染）</string>
+    <string name="dsp_warn">警告：仅发烧友专用。错误取值会导致声音变闷或失真，改坏可点"恢复默认"。</string>
+    <string name="dsp_hint">以下为输出级 DSP 参数。修改后返回主界面生效。</string>
+    <string name="dsp_soft_threshold">软限幅阈值（0.1–0.99，默认 0.89 = -1dBTP）</string>
+    <string name="dsp_soft_threshold_note">阈值以下声音原样通过；仅峰值被平滑压住，防止爆音。越低越早介入、声音越保守。</string>
     <string name="hrtf_max_itd">最大双耳时间差（毫秒，0.4–1.0）</string>
     <string name="hrtf_ild">声像强度差（0–1）</string>
     <string name="hrtf_shadow">头部阴影强度（0–1）</string>
@@ -108,4 +115,21 @@
     <string name="hrtf_reset_default">恢复默认参数</string>
     <string name="hrtf_bad_value">参数不合法，已恢复该项默认值</string>
     <string name="no_browser">设备上没有可用的浏览器</string>
+    <string name="dsp_sub_eq">图示均衡器（10 段，单位 dB）</string>
+    <string name="dsp_eq_note">ISO 标准倍频程频率。0 = 不处理；正值提升、负值衰减，范围 ±12dB。</string>
+    <string name="dsp_eq_reset">EQ 归零</string>
+    <string name="settings_locked_while_running">请先关闭环绕声再更改设置</string>
+    <string name="eq_preset_hint">预设（选择即载入）</string>
+    <string name="eq_preset_save">保存当前为新预设</string>
+    <string name="eq_preset_delete">删除当前预设</string>
+    <string name="eq_preset_name_title">预设名称</string>
+    <string name="eq_preset_saved">已保存</string>
+    <string name="eq_preset_deleted">已删除</string>
+    <string name="eq_preset_empty">还没有预设</string>
+    <string name="eq_preset_apply">应用预设（生效到声音）</string>
+    <string name="eq_preset_none">无预设（全 0）</string>
+    <string name="eq_preset_custom">自定义（未保存）</string>
+    <string name="eq_preset_applied">已应用到声音</string>
+<string name="dsp_bass">低音增强强度（0–1，0=关闭）</string>
+    <string name="dsp_bass_note">心理声学低音：用谐波让小喇叭也能"听出"低音。0=关闭；过大可能失真，慎用。</string>
 </resources>

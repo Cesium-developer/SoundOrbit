@@ -113,14 +113,14 @@
             android:textColor="#78909C" />
 
         <Button
-            android:id="@+id/advancedToggle"
+            android:id="@+id/dspToggle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/settings_advanced" />
+            android:text="@string/dsp_toggle" />
 
         <LinearLayout
-            android:id="@+id/advancedPanel"
+            android:id="@+id/dspPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -130,7 +130,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_advanced_warn"
+                android:text="@string/dsp_warn"
                 android:textSize="12sp"
                 android:textColor="#C62828" />
 
@@ -138,14 +138,318 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="@string/settings_advanced_hint"
+                android:text="@string/dsp_hint"
                 android:textSize="12sp"
                 android:textColor="#78909C" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/dsp_sub_output"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#263238" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/dsp_soft_threshold"
+                android:textSize="12sp"
+                android:textColor="#78909C" />
+            <EditText
+                android:id="@+id/dspSoftThreshold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/dsp_soft_threshold_note"
+                android:textSize="11sp"
+                android:textColor="#78909C" />
+
+            <Button
+                android:id="@+id/dspReset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/hrtf_reset_default" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:text="@string/dsp_bass"
+                android:textSize="12sp"
+                android:textColor="#78909C" />
+            <EditText
+                android:id="@+id/dspBass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/dsp_bass_note"
+                android:textSize="11sp"
+                android:textColor="#78909C" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="@string/dsp_sub_eq"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#263238" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/dsp_eq_note"
+                android:textSize="11sp"
+                android:textColor="#78909C" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="31.5 Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq0"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="63 Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq1"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="125 Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="250 Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq3"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="500 Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq4"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="1k Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq5"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="2k Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq6"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="4k Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq7"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="8k Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq8"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="16k Hz"
+                    android:textSize="12sp"
+                    android:textColor="#78909C" />
+                <EditText
+                    android:id="@+id/eq9"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal|numberSigned"
+                    android:text="0" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/eq_preset_hint"
+                android:textSize="12sp"
+                android:textColor="#78909C" />
+            <Spinner
+                android:id="@+id/eqPresetSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/eqPresetApply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/eq_preset_apply" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button
+                    android:id="@+id/eqPresetSave"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/eq_preset_save" />
+                <Button
+                    android:id="@+id/eqPresetDelete"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/eq_preset_delete" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/eqReset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/dsp_eq_reset" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="@string/dsp_sub_hrtf"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#263238" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="@string/hrtf_max_itd"
                 android:textSize="12sp"
                 android:textColor="#78909C" />
@@ -198,7 +502,7 @@
                 android:id="@+id/hrtfReset"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/hrtf_reset_default" />
         </LinearLayout>
     </LinearLayout>

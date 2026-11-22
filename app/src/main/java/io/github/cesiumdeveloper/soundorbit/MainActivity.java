@@ -69,6 +69,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         captureEngine = new CaptureEngine(this);
         captureEngine.setAuthCallback(this::refreshStatus);
 
+        // 守护：环绕声运行中，所有影响音效的设置不可更改（保活设置不在此列）。
+        installSettingGuard();
+
         depthField.setText(Float.toString(Prefs.getDepth(this)));
         periodField.setText(Float.toString(Prefs.getPeriod(this)));
         ratioField.setText(Float.toString(Prefs.getRatio(this)));
@@ -102,17 +105,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 startActivity(new Intent(this, SettingsActivity.class)));
 
         findViewById(R.id.githubRepo).setOnClickListener(v -> {
+            // 直接交给系统用默认浏览器打开；不加 resolveActivity 检查——
+            // 那玩意在 Android 11+ 包可见性限制下会误判成"没浏览器"，把本来能跳的挡掉。
             try {
                 Intent browser = new Intent(Intent.ACTION_VIEW,
                         android.net.Uri.parse("https://github.com/Cesium-developer/SoundOrbit"));
-                browser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (browser.resolveActivity(getPackageManager()) != null) {
-                    startActivity(browser);
-                } else {
-                    android.widget.Toast.makeText(this, R.string.no_browser,
-                            android.widget.Toast.LENGTH_SHORT).show();
-                }
-            } catch (Throwable t) {
+                startActivity(browser);
+            } catch (android.content.ActivityNotFoundException t) {
                 android.widget.Toast.makeText(this, R.string.no_browser,
                         android.widget.Toast.LENGTH_SHORT).show();
             }
@@ -138,6 +137,43 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         if (requestCode == CaptureEngine.REQ_CAPTURE) {
             captureEngine.onAuthorizationResult(this, resultCode, data);
             refreshStatus();
+        }
+    }
+
+    private long lastGuardToastMs = 0;
+
+    private boolean isAnyEngineRunning() {
+        return EngineGuard.isRunning();
+    }
+
+    private void warnLocked() {
+        long now = android.os.SystemClock.elapsedRealtime();
+        if (now - lastGuardToastMs > 1000) {
+            lastGuardToastMs = now;
+            android.widget.Toast.makeText(this, R.string.settings_locked_while_running,
+                    android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** 给音效控件装触摸守护：运行中拦截并提示，否则放行。 */
+    private void installSettingGuard() {
+        android.view.View.OnTouchListener guard = (v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_DOWN && isAnyEngineRunning()) {
+                warnLocked();
+                return true; // 吞掉事件，控件不响应
+            }
+            return false;
+        };
+        android.view.View[] guarded = {
+                depthField, periodField, ratioField,
+                periodRandomCheck, periodRandomMinField, periodRandomMaxField,
+                hrtfAzimuthField, hrtfRadiusField, hrtfElevationField,
+                findViewById(R.id.engineNative), findViewById(R.id.engineShizuku)
+        };
+        for (android.view.View v : guarded) if (v != null) v.setOnTouchListener(guard);
+        // Spinner：触摸拦截 + 选中回调里再挡一层（键盘/无障碍选择也能挡住）
+        if (channelSpinner != null) {
+            channelSpinner.setOnTouchListener(guard);
         }
     }
 
@@ -190,6 +226,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             if (isCaptureMode()) {
                 captureEngine.configureRandom(randomEnabled(), randomMin(), randomMax());
                 captureEngine.setHrtfParams(Prefs.getHrtfParams(this));
+                captureEngine.setSoftThreshold(Prefs.getSoftThreshold(this));
+                captureEngine.setEqBands(Prefs.getEq(this));
+                captureEngine.setBassStrength(Prefs.getBassStrength(this));
                 int res = captureEngine.start(currentDepth(), currentPeriod(),
                         currentRatio(), channelMode(),
                         currentHrtfAzimuth(), currentHrtfRadius(), currentHrtfElevation());
@@ -284,6 +323,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         if (captureEngine.isRunning()) {
             captureEngine.configureRandom(rand, rmin, rmax);
             captureEngine.setHrtfParams(Prefs.getHrtfParams(this));
+            captureEngine.setSoftThreshold(Prefs.getSoftThreshold(this));
+            captureEngine.setEqBands(Prefs.getEq(this));
+            captureEngine.setBassStrength(Prefs.getBassStrength(this));
             captureEngine.update(d, p, r, channelMode(), az, rad, el);
         }
     }

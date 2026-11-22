@@ -9,9 +9,7 @@ package io.github.cesiumdeveloper.soundorbit;
  *  - 头部阴影低通：远侧耳高频衰减
  *  - 前后区分：cos(az) 符号驱动高频着色（前方亮、后方暗）
  *  - 仰角区分：sin(el) 符号驱动高频着色（上方亮、下方暗）
- *
- * 这是 ITD/ILD + 简易耳廓着色，不是基于 HRIR 测量的真 HRTF：
- * 左右、前后、上下可区分，但不具备真人耳廓的精细频谱陷波。
+ *  - 耳廓陷波：中心频率随方位/仰角移动的窄带陷波
  *
  * 每个实例处理一个声源，内部有独立延迟线状态；立体声直接输入时用两个实例。
  */
@@ -31,6 +29,12 @@ public final class HRTFProcessor {
     private float nx1L, nx2L, ny1L, ny2L;
     private float nx1R, nx2R, ny1R, ny2R;
     private float nb0, nb1, nb2, na1, na2;
+
+    private final SoftLimiter limiter = new SoftLimiter();
+
+    public void setSoftThreshold(float threshold) {
+        limiter.setThreshold(threshold);
+    }
 
     public HRTFProcessor() {
         // 最大 ITD 约 0.7ms @48k ≈ 34 采样，留 2 倍余量
@@ -174,9 +178,7 @@ public final class HRTFProcessor {
         return a;
     }
 
-    private static short clamp16(float v) {
-        if (v > 0.99997f) return 32767;
-        if (v < -1f) return -32768;
-        return (short) (v * 32767f);
+    private short clamp16(float v) {
+        return limiter.limitToShort(v);
     }
 }

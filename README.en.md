@@ -15,7 +15,7 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 **Two engines, pick what fits:**
 
 - **Zero-latency engine** — attaches the effect directly to the system output mix and modulates the left/right channel gains with an **anti-phase triangle wave** (adjustable depth, period, and side/center time ratio; the period can also be randomized within a range). It never captures or replays audio, so there is no doubling, no echo, and no extra buffering.
-- **Spatial audio engine** — captures a copy of whatever is currently playing, then renders it into a binaural sound field that moves around your head using **ITD (interaural time difference) + ILD (interaural level difference) + head-shadow low-pass + simple pinna coloring**. Left/right, front/back, and up/down are distinguishable. This is simplified binaural rendering with spectral cues, not measurement-based HRTF, and perception varies by listener. Adds roughly 80–120 ms of latency and requires a one-time "record screen/audio" authorization.
+- **Spatial audio engine** — captures a copy of whatever is currently playing, then renders it into a binaural sound field that moves around your head using **ITD (interaural time difference) + ILD (interaural level difference) + head-shadow low-pass + pinna notch filtering**. Left/right, front/back, and up/down are distinguishable. Adds roughly 80–120 ms of latency and requires a one-time "record screen/audio" authorization.
 
 **What it's for:** immersive mono ASMR; adding movement to ordinary music; giving streams — live broadcasts, videos you can't be bothered to download — an extra surround dimension. Anything currently playing on the phone works; local files are not required.
 
@@ -30,7 +30,12 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
   - Panning: take left → both ears, take right → both ears, stereo downmixed to mono → both ears;
   - Binaural: stereo direct (L and R orbit independently), take-left source orbiting, take-right source orbiting, stereo downmixed to mono orbiting.
 - **Random period range**: each sweep/orbit picks a fresh period within `[min, max]`; the phase stays continuous with no jumps. Invalid ranges are rejected with a prompt to re-enter them.
-- **Live visualization**: pan position, per-channel gains, and triangle-wave phase refresh in sync with the audio.
+- **Live visualization**: refreshes in sync with the audio and switches view by engine/mode — panning shows pan position, per-channel gains, and triangle-wave phase; binaural shows a top-down head view (source azimuth, elevation, motion trail; stereo shows two sources).
+- **Output-stage DSP** (spatial audio, under Settings → DSP settings):
+  - **Soft limiter**: on by default, threshold -1 dBTP (0.89); smoothly compresses only peaks without touching normal levels; threshold adjustable (0.1–0.99).
+  - **10-band graphic EQ**: ISO octave centers (31.5 Hz–16 kHz), ±12 dB, flat by default (no processing); save multiple custom presets — selecting a preset requires tapping *Apply preset* to take effect.
+  - **Bass enhancement**: psychoacoustic bass, strength 0–1, default 0 (off).
+- **Runtime guard**: while surround is on, all sound-affecting parameters are locked; tapping them prompts you to turn surround off first (keep-alive and language settings are unaffected).
 - **Bilingual UI**: Simplified Chinese and English built in; switch in Settings (follow system / Chinese / English), defaulting to the system language.
 - **Background survival**: foreground service, optional battery-optimization exemption, optional accessibility-based keep-alive, quick settings tile, and a notification showing live gains and parameters.
 - **Unconstrained parameters**: depth, period, and ratio are free numeric inputs with no forced slider caps (output is clamped only at the int16 boundary).
@@ -48,9 +53,14 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 
 > Binaural mode uses only `period + start azimuth + radius + elevation`; depth and ratio have no effect on it (noted in the UI as well).
 
-### Audiophile parameters (Settings · Advanced)
+### DSP settings (Settings · Advanced)
 
-Low-level binaural rendering controls, collapsed by default under **Settings → Audiophile parameters (advanced)**. For audiophiles only — bad values may break positioning or volume. Out-of-range values are clamped automatically, and *Reset to defaults* restores everything. Defaults are the recommended values; leaving them untouched preserves the original sound.
+Collapsed by default under **Settings → DSP settings (advanced)**, containing two sections:
+
+- **Output processing**: soft-limiter threshold, bass-enhancement strength;
+- **HRTF settings (spatial rendering)**: low-level binaural controls — bad values may break positioning or volume. Out-of-range values are clamped automatically with a *Reset to defaults* button. Defaults are recommended.
+
+The table below lists the HRTF parameters; output-processing parameters are described above.
 
 | Parameter | Meaning | Default | Range |
 |---|---|---|---|
@@ -67,12 +77,14 @@ Low-level binaural rendering controls, collapsed by default under **Settings →
 2. **Zero latency**: select the *Lightweight* engine → tap *Enable surround*, or add the *Realtime surround* quick tile. Defaults `20 / 20 / 1` are audible immediately.
 3. **Spatial audio**: select the *Advanced* engine → tap *Authorize audio capture* → allow "record screen/audio" in the dialog → pick one of the seven modes → enable.
 4. For a random period: check *Random period range* below the period field and enter the lower and upper bounds.
-5. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, view/copy diagnostics, and the collapsed *Audiophile parameters (advanced)* panel for fine-tuning binaural rendering.
+5. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, view/copy diagnostics, and the collapsed *DSP settings (advanced)* panel for output processing and HRTF fine-tuning.
+6. To tune sound: turn surround off → open *DSP settings* → adjust the soft limiter / bass in Output processing, or use the 10-band EQ (tap *Apply preset* to commit changes; multiple custom presets can be saved) → return and re-enable surround. These parameters are locked while running.
 
 ## How it works
 
 - **Zero latency / panning**: `DynamicsProcessing` is attached to the session 0 global mix, changing per-channel input gains in real time with an anti-phase triangle wave; panning modes first duplicate or downmix channels. No capture, so no doubling.
 - **Binaural**: `AudioPlaybackCapture` grabs a copy of other apps' playback, renders a binaural field with ITD (delay line) + ILD (far-side attenuation) + head-shadow low-pass, then plays it back through `AudioTrack`. On start it mutes the media stream to kill the original (verified that muting does not affect capture) and plays back on a separate ASSISTANT stream — again with no doubling. Its own UID is excluded from capture to prevent the playback from being re-captured into a feedback loop.
+- **Output DSP**: before writing, spatial audio passes through a 10-band peaking-biquad EQ and a soft limiter (tanh compression, unity below the threshold); bass enhancement adds harmonics for a psychoacoustic low end, off by default. The lightweight engine only has access to system gains, so these effects are spatial-audio only.
 
 ## Compatibility & limitations
 

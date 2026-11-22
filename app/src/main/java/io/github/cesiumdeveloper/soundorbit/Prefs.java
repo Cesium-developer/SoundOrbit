@@ -19,6 +19,10 @@ public final class Prefs {
     private static final String KEY_ILD = "hrtf_ild";
     private static final String KEY_SHADOW = "hrtf_shadow";
     private static final String KEY_NOTCH_R = "hrtf_notch_r";
+    private static final String KEY_SOFT_THRESHOLD = "soft_limit_threshold";
+    private static final String KEY_EQ_BANDS = "eq_bands";
+    private static final String KEY_EQ_PRESETS = "eq_presets";
+    private static final String KEY_BASS_STRENGTH = "bass_strength";
 
     private Prefs() {
     }
@@ -100,6 +104,57 @@ public final class Prefs {
         e.putFloat(KEY_PERIOD, period);
         e.putFloat(KEY_RATIO, ratio);
         e.apply();
+    }
+
+    public static float getSoftThreshold(Context c) {
+        return c.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+                .getFloat(KEY_SOFT_THRESHOLD, SoftLimiter.DEFAULT_THRESHOLD);
+    }
+
+    public static void saveSoftThreshold(Context c, float threshold) {
+        c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+                .putFloat(KEY_SOFT_THRESHOLD, threshold).apply();
+    }
+
+    public static float[] getEq(Context c) {
+        String raw = c.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+                .getString(KEY_EQ_BANDS, "");
+        float[] bands = new float[GraphicEQ.BANDS];
+        if (raw == null || raw.isEmpty()) return bands;
+        String[] parts = raw.split(",");
+        for (int i = 0; i < Math.min(parts.length, bands.length); i++) {
+            try { bands[i] = Float.parseFloat(parts[i]); } catch (Throwable ignored) {}
+        }
+        return bands;
+    }
+
+    public static float getBassStrength(Context c) {
+        return c.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+                .getFloat(KEY_BASS_STRENGTH, 0f);
+    }
+    public static void saveBassStrength(Context c, float v) {
+        c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+                .putFloat(KEY_BASS_STRENGTH, v).apply();
+    }
+
+    public static String getEqPresetsRaw(Context c) {
+        return c.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+                .getString(KEY_EQ_PRESETS, "");
+    }
+
+    public static void saveEqPresetsRaw(Context c, String raw) {
+        c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+                .putString(KEY_EQ_PRESETS, raw).apply();
+    }
+
+    public static void saveEq(Context c, float[] bands) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bands.length; i++) {
+            if (i > 0) sb.append(',');
+            sb.append(bands[i]);
+        }
+        c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+                .putString(KEY_EQ_BANDS, sb.toString()).apply();
     }
 
     public static void saveHrtf(Context c, float az, float rad, float el) {

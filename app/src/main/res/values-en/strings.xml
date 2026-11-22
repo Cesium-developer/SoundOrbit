@@ -98,9 +98,16 @@
     <string name="capture_channel">Audio capture</string>
     <string name="capture_notif_title">Capturing audio</string>
     <string name="capture_notif_text">For realtime surround processing</string>
-    <string name="settings_advanced">Audiophile parameters (advanced)</string>
+    <string name="settings_advanced">Audiophile parameters · HRTF (advanced)</string>
     <string name="settings_advanced_warn">Warning: for audiophiles only. Bad values may break positioning or volume. Use "Reset" if unsure.</string>
-    <string name="settings_advanced_hint">Low-level binaural rendering parameters. Defaults are recommended. Changes apply on returning to the main screen.</string>
+    <string name="settings_advanced_hint">Low-level binaural (HRTF) rendering parameters. Defaults are recommended. Changes apply on returning to the main screen.</string>
+    <string name="dsp_toggle">DSP settings (advanced)</string>
+    <string name="dsp_sub_output">Output processing · soft limiter</string>
+    <string name="dsp_sub_hrtf">HRTF settings (spatial rendering)</string>
+    <string name="dsp_warn">Warning: for audiophiles only. Bad values may make audio sound muffled or distorted. Use "Reset" if unsure.</string>
+    <string name="dsp_hint">Output-stage DSP parameters. Changes apply on returning to the main screen.</string>
+    <string name="dsp_soft_threshold">Soft limiter threshold (0.1–0.99, default 0.89 = -1 dBTP)</string>
+    <string name="dsp_soft_threshold_note">Below the threshold audio passes untouched; only peaks are smoothly tamed to prevent clipping. Lower = earlier engagement, more conservative sound.</string>
     <string name="hrtf_max_itd">Max interaural time difference (ms, 0.4–1.0)</string>
     <string name="hrtf_ild">Interaural level difference (0–1)</string>
     <string name="hrtf_shadow">Head-shadow strength (0–1)</string>
@@ -108,4 +115,21 @@
     <string name="hrtf_reset_default">Reset to defaults</string>
     <string name="hrtf_bad_value">Invalid value, restored to default</string>
     <string name="no_browser">No browser available on this device</string>
+    <string name="dsp_sub_eq">Graphic equalizer (10 bands, dB)</string>
+    <string name="dsp_eq_note">ISO standard octave frequencies. 0 = no effect; positive boosts, negative cuts, range ±12 dB.</string>
+    <string name="dsp_eq_reset">Reset EQ</string>
+    <string name="settings_locked_while_running">Turn off surround sound before changing settings</string>
+    <string name="eq_preset_hint">Presets (select to load)</string>
+    <string name="eq_preset_save">Save current as new preset</string>
+    <string name="eq_preset_delete">Delete current preset</string>
+    <string name="eq_preset_name_title">Preset name</string>
+    <string name="eq_preset_saved">Saved</string>
+    <string name="eq_preset_deleted">Deleted</string>
+    <string name="eq_preset_empty">No presets yet</string>
+    <string name="eq_preset_apply">Apply preset (to audio)</string>
+    <string name="eq_preset_none">No preset (all zero)</string>
+    <string name="eq_preset_custom">Custom (unsaved)</string>
+    <string name="eq_preset_applied">Applied to audio</string>
+<string name="dsp_bass">Bass enhancement strength (0–1, 0=off)</string>
+    <string name="dsp_bass_note">Psychoacoustic bass: harmonics imply low notes on small speakers. 0=off; too high may distort.</string>
 </resources>
