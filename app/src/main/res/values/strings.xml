@@ -99,4 +99,13 @@
     <string name="capture_channel">音频捕获</string>
     <string name="capture_notif_title">正在捕获音频</string>
     <string name="capture_notif_text">用于实时环绕声处理</string>
+    <string name="settings_advanced">发烧友参数（高级）</string>
+    <string name="settings_advanced_warn">警告：仅发烧友专用。错误取值会导致定位错乱或音量异常，改坏可点"恢复默认"。</string>
+    <string name="settings_advanced_hint">以下为双耳渲染的底层参数，默认值即推荐值。修改后返回主界面生效。</string>
+    <string name="hrtf_max_itd">最大双耳时间差（毫秒，0.4–1.0）</string>
+    <string name="hrtf_ild">声像强度差（0–1）</string>
+    <string name="hrtf_shadow">头部阴影强度（0–1）</string>
+    <string name="hrtf_notch_r">耳廓陷波锐度（0.5–0.95）</string>
+    <string name="hrtf_reset_default">恢复默认参数</string>
+    <string name="hrtf_bad_value">参数不合法，已恢复该项默认值</string>
 </resources>

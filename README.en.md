@@ -15,7 +15,7 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 **Two engines, pick what fits:**
 
 - **Zero-latency engine** — attaches the effect directly to the system output mix and modulates the left/right channel gains with an **anti-phase triangle wave** (adjustable depth, period, and side/center time ratio; the period can also be randomized within a range). It never captures or replays audio, so there is no doubling, no echo, and no extra buffering.
-- **Spatial audio engine** — captures a copy of whatever is currently playing, then renders it into a binaural sound field with a clear sense of position and motion using **ITD (interaural time difference) + ILD (interaural level difference) + head-shadow low-pass filtering**. Adds roughly 80–120 ms of latency and requires a one-time "record screen/audio" authorization.
+- **Spatial audio engine** — captures a copy of whatever is currently playing, then renders it into a binaural sound field that moves around your head using **ITD (interaural time difference) + ILD (interaural level difference) + head-shadow low-pass + simple pinna coloring**. Left/right, front/back, and up/down are distinguishable. This is simplified binaural rendering with spectral cues, not measurement-based HRTF, and perception varies by listener. Adds roughly 80–120 ms of latency and requires a one-time "record screen/audio" authorization.
 
 **What it's for:** immersive mono ASMR; adding movement to ordinary music; giving streams — live broadcasts, videos you can't be bothered to download — an extra surround dimension. Anything currently playing on the phone works; local files are not required.
 
@@ -48,13 +48,26 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 
 > Binaural mode uses only `period + start azimuth + radius + elevation`; depth and ratio have no effect on it (noted in the UI as well).
 
+### Audiophile parameters (Settings · Advanced)
+
+Low-level binaural rendering controls, collapsed by default under **Settings → Audiophile parameters (advanced)**. For audiophiles only — bad values may break positioning or volume. Out-of-range values are clamped automatically, and *Reset to defaults* restores everything. Defaults are the recommended values; leaving them untouched preserves the original sound.
+
+| Parameter | Meaning | Default | Range |
+|---|---|---|---|
+| Max interaural time difference (ms) | ITD ceiling, controls stage width / head-size calibration | 0.7 | 0.4–1.0 |
+| Interaural level difference | ILD depth: higher = sharper positioning, lower = more natural | 0.55 | 0–1 |
+| Head-shadow strength | High-frequency attenuation on the far ear, a spatial cue | 0.55 | 0–1 |
+| Pinna notch sharpness | Spectrum-notch bandwidth behind front/back and up/down cues; closer to 1 = narrower and deeper | 0.8 | 0.5–0.95 |
+
+> Changes apply on returning to the main screen (next audio frame even while running). If you mess things up, tap *Reset to defaults*.
+
 ## Usage
 
 1. Headphones or a stereo output device are recommended.
 2. **Zero latency**: select the *Lightweight* engine → tap *Enable surround*, or add the *Realtime surround* quick tile. Defaults `20 / 20 / 1` are audible immediately.
 3. **Spatial audio**: select the *Advanced* engine → tap *Authorize audio capture* → allow "record screen/audio" in the dialog → pick one of the seven modes → enable.
 4. For a random period: check *Random period range* below the period field and enter the lower and upper bounds.
-5. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, and view/copy diagnostics.
+5. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, view/copy diagnostics, and the collapsed *Audiophile parameters (advanced)* panel for fine-tuning binaural rendering.
 
 ## How it works
 

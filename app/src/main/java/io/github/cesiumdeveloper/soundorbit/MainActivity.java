@@ -184,6 +184,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             checkOutputDevice();
             if (isCaptureMode()) {
                 captureEngine.configureRandom(randomEnabled(), randomMin(), randomMax());
+                captureEngine.setHrtfParams(Prefs.getHrtfParams(this));
                 int res = captureEngine.start(currentDepth(), currentPeriod(),
                         currentRatio(), channelMode(),
                         currentHrtfAzimuth(), currentHrtfRadius(), currentHrtfElevation());
@@ -277,6 +278,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         }
         if (captureEngine.isRunning()) {
             captureEngine.configureRandom(rand, rmin, rmax);
+            captureEngine.setHrtfParams(Prefs.getHrtfParams(this));
             captureEngine.update(d, p, r, channelMode(), az, rad, el);
         }
     }

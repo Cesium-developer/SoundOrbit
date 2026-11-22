@@ -20,12 +20,18 @@ public final class PeriodRandomizer {
     private boolean primed;
 
     public void configure(boolean enabled, float base, float min, float max) {
+        // 只有当周期配置真正变化时才重置相位。applyParams 每次 onPause 都用相同
+        // 周期值调 configure，若无条件 phase=0 会让三角波跳回起点（位置瞬移）。
+        boolean changed = this.enabled != enabled || this.base != base
+                || this.min != min || this.max != max;
         this.enabled = enabled;
         this.base = base;
         this.min = min;
         this.max = max;
-        this.primed = false;
-        this.phase = 0.0;
+        if (changed || !primed) {
+            this.primed = false;
+            this.phase = 0.0;
+        }
     }
 
     /** 用当前 tSec 推进并返回相位 [0,1)；tSec 单调（引擎累计秒数） */

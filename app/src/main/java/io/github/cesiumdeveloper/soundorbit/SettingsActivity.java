@@ -11,6 +11,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Spinner;
 import android.widget.AdapterView;
@@ -19,6 +20,8 @@ import java.util.List;
 
 public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
     private TextView diagText;
+    private android.view.View advancedPanel;
+    private EditText hrtfMaxItdField, hrtfIldField, hrtfShadowField, hrtfNotchRField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +51,26 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
             }
+        });
+
+        // 发烧友参数：折叠面板 + 默认值填充
+        advancedPanel = findViewById(R.id.advancedPanel);
+        hrtfMaxItdField = findViewById(R.id.hrtfMaxItd);
+        hrtfIldField = findViewById(R.id.hrtfIld);
+        hrtfShadowField = findViewById(R.id.hrtfShadow);
+        hrtfNotchRField = findViewById(R.id.hrtfNotchR);
+        loadHrtfParams();
+        findViewById(R.id.advancedToggle).setOnClickListener(v -> {
+            advancedPanel.setVisibility(advancedPanel.getVisibility() == android.view.View.VISIBLE
+                    ? android.view.View.GONE : android.view.View.VISIBLE);
+        });
+        findViewById(R.id.hrtfReset).setOnClickListener(v -> {
+            HrtfParams d = HrtfParams.defaults();
+            hrtfMaxItdField.setText(String.valueOf(d.maxItdMs));
+            hrtfIldField.setText(String.valueOf(d.ildDepth));
+            hrtfShadowField.setText(String.valueOf(d.shadow));
+            hrtfNotchRField.setText(String.valueOf(d.notchR));
+            Prefs.saveHrtfParams(this, d);
         });
 
         findViewById(R.id.battery).setOnClickListener(v -> {
@@ -89,6 +112,44 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
     protected void onResume() {
         super.onResume();
         showDiag();
+    }
+
+    @Override
+    protected void onPause() {
+        saveHrtfParams();
+        super.onPause();
+    }
+
+    private void loadHrtfParams() {
+        HrtfParams p = Prefs.getHrtfParams(this);
+        hrtfMaxItdField.setText(String.valueOf(p.maxItdMs));
+        hrtfIldField.setText(String.valueOf(p.ildDepth));
+        hrtfShadowField.setText(String.valueOf(p.shadow));
+        hrtfNotchRField.setText(String.valueOf(p.notchR));
+    }
+
+    private void saveHrtfParams() {
+        HrtfParams d = HrtfParams.defaults();
+        float itd = parseFloatOr(hrtfMaxItdField, d.maxItdMs);
+        float ild = parseFloatOr(hrtfIldField, d.ildDepth);
+        float shadow = parseFloatOr(hrtfShadowField, d.shadow);
+        float notch = parseFloatOr(hrtfNotchRField, d.notchR);
+        Prefs.saveHrtfParams(this, new HrtfParams(itd, ild, shadow, notch));
+        // 越界值被构造器 clamp，回写输入框让用户看到实际生效值
+        HrtfParams p = Prefs.getHrtfParams(this);
+        hrtfMaxItdField.setText(String.valueOf(p.maxItdMs));
+        hrtfIldField.setText(String.valueOf(p.ildDepth));
+        hrtfShadowField.setText(String.valueOf(p.shadow));
+        hrtfNotchRField.setText(String.valueOf(p.notchR));
+    }
+
+    private float parseFloatOr(EditText f, float fallback) {
+        try {
+            float v = Float.parseFloat(f.getText().toString().trim());
+            return Float.isNaN(v) || Float.isInfinite(v) ? fallback : v;
+        } catch (Throwable t) {
+            return fallback;
+        }
     }
 
     private void showDiag() {

@@ -48,6 +48,7 @@ public final class CaptureEngine {
     private volatile float hrtfAzimuth = 0f;    // 起始方位，度，0=正前
     private volatile float hrtfRadius = 0.5f;   // 半径 0~1，越小越贴头
     private volatile float hrtfElevation = 0f;  // 仰角，度
+    private volatile HrtfParams hrtfParams = HrtfParams.defaults(); // 发烧友参数
 
     private volatile String lastError;
     private HRTFProcessor hrtf;
@@ -148,7 +149,9 @@ public final class CaptureEngine {
             int rate = 48000;
             int chIn = AudioFormat.CHANNEL_IN_STEREO;
             int fmt = AudioFormat.ENCODING_PCM_16BIT;
-            int frames = rate * 40 / 1000;
+            // 20ms 一帧（原 40ms）：周期短时方位/增益的阶梯感减半，旋转更平滑。
+            // AudioTrack/AudioRecord 缓冲同步减半，仍是 48k 下的常规大小。
+            int frames = rate * 20 / 1000;
             int byteBuf = frames * 2 * 2;
 
             AudioPlaybackCaptureConfiguration cfg =
@@ -199,14 +202,7 @@ public final class CaptureEngine {
                 return -3;
             }
 
-            if (isHrtf(mode)) {
-                hrtf = new HRTFProcessor();
-                hrtf.reset();
-                if (mode == MODE_HRTF_STEREO) {
-                    hrtfR = new HRTFProcessor();
-                    hrtfR.reset();
-                }
-            }
+            ensureHrtfForMode(true);
             // 静音媒体 stream 掐掉原声（实测静音不影响 capture），只播处理后的 ASSISTANT 流
             muteMedia(true);
             running = true;
@@ -240,6 +236,12 @@ public final class CaptureEngine {
             } catch (InterruptedException ignored) {
             }
         }
+        releaseAudioResources();
+        Log.i(TAG, "stopped");
+    }
+
+    /** 幂等释放音频资源；stop() 与 loop 异常退出都调用，避免重复释放 */
+    private void releaseAudioResources() {
         if (rec != null) {
             try { rec.stop(); } catch (Throwable ignored) {}
             try { rec.release(); } catch (Throwable ignored) {}
@@ -255,7 +257,21 @@ public final class CaptureEngine {
             app.stopService(new Intent(app, CaptureFgService.class));
         } catch (Throwable ignored) {
         }
-        Log.i(TAG, "stopped");
+    }
+
+    /** 写 AudioTrack 并检查返回值；DEAD_OBJECT 等错误时让引擎停止并上报，而非静默空转 */
+    private boolean writeTrack(short[] buf, int count) {
+        int written = track.write(buf, 0, count);
+        if (written < 0) {
+            lastError = "播回失败(" + written + ")，可能切换了音频设备";
+            EffectState.error = lastError;
+            EffectState.active = false;
+            running = false;
+            Log.e(TAG, "AudioTrack.write returned " + written);
+            writeFile("capture_peak.txt", "track.write=" + written + "\n");
+            return false;
+        }
+        return true;
     }
 
     /** 启动后自检：把各 stream 实时音量、track 状态写入文件 */
@@ -342,7 +358,31 @@ public final class CaptureEngine {
         hrtfAzimuth = az;
         hrtfRadius = rad;
         hrtfElevation = el;
+        // 运行中从非 HRTF 模式切到 HRTF 时，hrtf 尚未创建；这里补建，
+        // 否则 loop 的 isHrtf 分支会对 null 调用 processByPhase 而静默崩溃。
+        if (running) ensureHrtfForMode(false);
         randomizer.configure(randEnabled, period, randMin, randMax);
+    }
+
+    /**
+     * 确保当前 mode 需要的 HRTF 处理器可用。
+     * @param force true=强制重建并 reset（start 时清掉上一轮残留）；false=仅 null 时补建（运行时切换）
+     */
+    private void ensureHrtfForMode(boolean force) {
+        if (!isHrtf(mode)) return;
+        if (force || hrtf == null) {
+            hrtf = new HRTFProcessor();
+            hrtf.reset();
+        }
+        if (mode == MODE_HRTF_STEREO && (force || hrtfR == null)) {
+            hrtfR = new HRTFProcessor();
+            hrtfR.reset();
+        }
+    }
+
+    /** 发烧友参数（运行中可改，下一帧生效） */
+    public void setHrtfParams(HrtfParams params) {
+        this.hrtfParams = (params == null) ? HrtfParams.defaults() : params;
     }
 
     /** 设置周期随机配置（start 前或运行中均可） */
@@ -392,9 +432,9 @@ public final class CaptureEngine {
                     if (mode == MODE_HRTF_STEREO) {
                         // 立体声直接输入：L/R 两个独立声源，起始方位相差 180°，各自绕头后叠加
                         hrtf.processByPhase(monoL, buf, sampleFrames, phase,
-                                hrtfAzimuth, hrtfRadius, hrtfElevation);
+                                hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams);
                         hrtfR.processByPhase(monoR, outR, sampleFrames, phase,
-                                hrtfAzimuth + 180f, hrtfRadius, hrtfElevation);
+                                hrtfAzimuth + 180f, hrtfRadius, hrtfElevation, hrtfParams);
                         for (int i = 0; i < sampleFrames * 2; i++) {
                             int sum = buf[i] + outR[i];
                             buf[i] = clampSample(sum * 0.5f);
@@ -413,7 +453,7 @@ public final class CaptureEngine {
                             src = monoL;
                         }
                         hrtf.processByPhase(src, buf, sampleFrames, phase,
-                                hrtfAzimuth, hrtfRadius, hrtfElevation);
+                                hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams);
                     }
                     // 可视化：真环绕声用相位表达旋转进度，增益固定 1
                     EffectState.phase = (float) phase;
@@ -425,14 +465,14 @@ public final class CaptureEngine {
                     EffectState.ratio = ratio;
                     EffectState.active = true;
                     EffectState.lastUpdateNs = System.nanoTime();
-                    track.write(buf, 0, sampleFrames * 2);
+                    if (!writeTrack(buf, sampleFrames * 2)) break;
                     continue;
                 }
 
                 // 与轻量引擎共用同一份算法（相位来自周期随机器）
                 float[] g = SurroundMath.gainsFromPhase(depth, ratio, phase);
-                float linL = SurroundMath.toLinearCapture(g[0]);
-                float linR = SurroundMath.toLinearCapture(g[1]);
+                float linL = SurroundMath.toLinearCapture(g[0], depth);
+                float linR = SurroundMath.toLinearCapture(g[1], depth);
 
                 // 更新可视化快照（与音频同帧，比 20ms 轮询更准）
                 EffectState.tri = g[2];
@@ -470,7 +510,7 @@ public final class CaptureEngine {
                     if (a > diagOutPeak) diagOutPeak = a;
                 }
                 diagWrites++;
-                track.write(buf, 0, sampleFrames * 2);
+                if (!writeTrack(buf, sampleFrames * 2)) break;
 
                 long now = System.currentTimeMillis();
                 if (now - diagAt >= 2000) {
@@ -488,6 +528,14 @@ public final class CaptureEngine {
         } catch (Throwable t) {
             Log.e(TAG, "loop failed", t);
             writeFile("capture_peak.txt", "loop FAILED " + t + "\n");
+            lastError = "处理线程异常: " + t.getMessage();
+            EffectState.error = lastError;
+        } finally {
+            // 无论正常退出、write 失败还是异常，都释放资源并清运行状态，
+            // 避免"无声但 UI 显示运行中"。stop() 是幂等的，重复调用无害。
+            running = false;
+            EffectState.active = false;
+            releaseAudioResources();
         }
     }
 

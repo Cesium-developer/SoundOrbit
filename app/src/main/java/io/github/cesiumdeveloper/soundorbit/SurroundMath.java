@@ -34,12 +34,22 @@ public final class SurroundMath {
     }
 
     /**
-     * 捕获引擎用：增益上限 1.0（只衰减不放大），避免把已-normalize 的音频放大到削波。
-     * 捕获到的音频峰值已接近满幅，再乘 >1 就会削波失真。
+     * 捕获引擎用：把增益映射到 [0,1] 的衰减系数（只衰减不放大），避免把已-normalize
+     * 的音频放大到削波。增益原始区间是 [1-depth, 1]（depth>1 时会越过 0 变负），
+     * 旧的 abs+clamp(-1,1) 会把 1-depth 这类负值取绝对值后钳到 1，导致左右全程
+     * 满幅、摆动失效。这里改为把 [1-depth, 1] 线性归一化到 [0,1]：
+     * 近耳(1)->1 不衰减，最远(1-depth)->0 全衰减，中间平滑过渡。
      */
+    public static float toLinearCapture(float gain, float depth) {
+        if (depth <= 0f) return 1f;
+        float coefficient = 1f + (gain - 1f) / depth;
+        if (coefficient < 0f) coefficient = 0f;
+        if (coefficient > 1f) coefficient = 1f;
+        return coefficient;
+    }
+
+    /** 兼容旧签名（depth 未知时按 1 处理，仅作保底，正常路径请用带 depth 的版本） */
     public static float toLinearCapture(float gain) {
-        float magnitude = Math.abs(gain);
-        if (magnitude > 1f) magnitude = 1f;
-        return magnitude;
+        return toLinearCapture(gain, 1f);
     }
 }

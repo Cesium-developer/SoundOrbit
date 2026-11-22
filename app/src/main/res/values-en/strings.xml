@@ -99,4 +99,13 @@
     <string name="capture_channel">Audio capture</string>
     <string name="capture_notif_title">Capturing audio</string>
     <string name="capture_notif_text">For realtime surround processing</string>
+    <string name="settings_advanced">Audiophile parameters (advanced)</string>
+    <string name="settings_advanced_warn">Warning: for audiophiles only. Bad values may break positioning or volume. Use "Reset" if unsure.</string>
+    <string name="settings_advanced_hint">Low-level binaural rendering parameters. Defaults are recommended. Changes apply on returning to the main screen.</string>
+    <string name="hrtf_max_itd">Max interaural time difference (ms, 0.4–1.0)</string>
+    <string name="hrtf_ild">Interaural level difference (0–1)</string>
+    <string name="hrtf_shadow">Head-shadow strength (0–1)</string>
+    <string name="hrtf_notch_r">Pinna notch sharpness (0.5–0.95)</string>
+    <string name="hrtf_reset_default">Reset to defaults</string>
+    <string name="hrtf_bad_value">Invalid value, restored to default</string>
 </resources>

@@ -15,6 +15,10 @@ public final class Prefs {
     private static final String KEY_RAND_MIN = "period_rand_min";
     private static final String KEY_RAND_MAX = "period_rand_max";
     private static final String KEY_LANGUAGE = "language_mode";
+    private static final String KEY_MAX_ITD = "hrtf_max_itd";
+    private static final String KEY_ILD = "hrtf_ild";
+    private static final String KEY_SHADOW = "hrtf_shadow";
+    private static final String KEY_NOTCH_R = "hrtf_notch_r";
 
     private Prefs() {
     }
@@ -41,6 +45,24 @@ public final class Prefs {
 
     public static float getHrtfElevation(Context c) {
         return c.getSharedPreferences(NAME, Context.MODE_PRIVATE).getFloat(KEY_HRTF_EL, 0f);
+    }
+
+    public static HrtfParams getHrtfParams(Context c) {
+        android.content.SharedPreferences p = c.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+        return new HrtfParams(
+                p.getFloat(KEY_MAX_ITD, HrtfParams.DEFAULT_MAX_ITD_MS),
+                p.getFloat(KEY_ILD, HrtfParams.DEFAULT_ILD_DEPTH),
+                p.getFloat(KEY_SHADOW, HrtfParams.DEFAULT_SHADOW),
+                p.getFloat(KEY_NOTCH_R, HrtfParams.DEFAULT_NOTCH_R));
+    }
+
+    public static void saveHrtfParams(Context c, HrtfParams v) {
+        SharedPreferences.Editor e = c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit();
+        e.putFloat(KEY_MAX_ITD, v.maxItdMs);
+        e.putFloat(KEY_ILD, v.ildDepth);
+        e.putFloat(KEY_SHADOW, v.shadow);
+        e.putFloat(KEY_NOTCH_R, v.notchR);
+        e.apply();
     }
 
     public static boolean getPeriodRandom(Context c) {
