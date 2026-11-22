@@ -127,12 +127,12 @@ ISO 倍频程标准中心频率，单位 dB，默认全 0（不处理）：
 
 ```bash
 ./gradlew :app:assembleDebug     # 调试包
-./gradlew :app:assembleRelease   # 发布包（无签名，供 F-Droid/CI 自行签名）
+./gradlew :app:assembleRelease   # 发布包（无签名）
 ```
 
 产物分别在 `app/build/outputs/apk/debug/` 与 `app/build/outputs/apk/release/`（后者为 `app-release-unsigned.apk`）。需要 Android SDK（API 34）与 JDK 17。工程使用 Gradle Wrapper + AGP 8.6.1，`compileSdk 34`、`minSdk 29`、`targetSdk 34`。Android 模块在 `app/` 子目录。
 
-**可复现构建**：`build.gradle` 只从环境变量（`SIGN_KEYSTORE` 等）读取签名密钥；本地与 F-Droid 构建环境不注入这些变量，因此直接产出 unsigned APK，由 F-Droid 用自己的密钥签名。源码树内不含任何签名密钥或本机绝对路径（`local.properties` 已 gitignore）。无任何网络依赖、无专有 SDK，纯 AndroidX 依赖，适合从源码独立构建。
+**构建说明**：`build.gradle` 只从环境变量（`SIGN_KEYSTORE` 等）读取签名密钥；本地不注入这些变量时直接产出 unsigned APK，可自行签名。源码树内不含任何签名密钥或本机绝对路径（`local.properties` 已 gitignore）。无任何网络依赖、无专有 SDK，纯 AndroidX 依赖。
 
 IDE 直接打开工程根目录即可（Android Studio）。
 
@@ -140,11 +140,8 @@ IDE 直接打开工程根目录即可（Android Studio）。
 
 推送一个 `v` 开头的 tag（如 `git tag v0.1.3 && git push origin v0.1.3`），`.github/workflows/release.yml` 会打上版本号、用正式签名构建 APK，并创建附带该 APK 的 GitHub Release。签名密钥不进仓库——CI 从仓库 Secrets（`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`）还原，因此发布包签名稳定、用户可直接覆盖升级。
 
-tag 名严格采用 `v<versionName>`（如 `v0.1.3`）；F-Droid 的 `AutoUpdateMode: Version v%v` / `UpdateCheckMode: Tags` 依赖此命名来自动发现新版本并构建，因此不要改动这个格式。
+tag 名统一采用 `v<versionName>`（如 `v0.1.3`），保持一致以便工具识别版本。
 
-## F-Droid
-
-本应用许可为 GPL-3.0，无 `INTERNET` 权限、无网络调用、无专有依赖，可从源码独立构建，适合收录进 F-Droid。F-Droid 元数据（`.yml`）放在 F-Droid 官方的 `fdroiddata` 仓库，按该仓库的提交流程申请收录；应用源码只在此 GitHub 仓库维护，F-Droid 按 tag 拉取源码、自行构建并用自己的密钥签名，因此 F-Droid 版与 GitHub Release 版签名不同，同一台设备如需切换需先卸载另一方。
 
 ## 贡献
 

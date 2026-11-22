@@ -127,12 +127,12 @@ Each band's gain ranges ±12 dB (positive boosts, negative cuts).
 
 ```bash
 ./gradlew :app:assembleDebug     # debug APK
-./gradlew :app:assembleRelease   # release APK (unsigned, for F-Droid/CI to sign)
+./gradlew :app:assembleRelease   # release APK (unsigned)
 ```
 
 APKs land in `app/build/outputs/apk/debug/` and `app/build/outputs/apk/release/` (the latter as `app-release-unsigned.apk`). Requires Android SDK (API 34) and JDK 17. The project uses the Gradle Wrapper + AGP 8.6.1, with `compileSdk 34`, `minSdk 29`, `targetSdk 34`. The Android module is in the `app/` subdirectory.
 
-**Reproducible builds**: `build.gradle` reads signing keys only from environment variables (`SIGN_KEYSTORE`, etc.). Local and F-Droid builds do not inject these, so they produce an unsigned APK that F-Droid signs with its own key. No signing keys or machine-specific absolute paths live in the source tree (`local.properties` is gitignored). No network dependencies, no proprietary SDKs, AndroidX-only — suitable for independent source builds.
+**Build notes**: `build.gradle` reads signing keys only from environment variables (`SIGN_KEYSTORE`, etc.); without them, a local build produces an unsigned APK that you can sign yourself. No signing keys or machine-specific absolute paths live in the source tree (`local.properties` is gitignored). No network dependencies, no proprietary SDKs, AndroidX-only.
 
 Just open the project root in Android Studio.
 
@@ -140,11 +140,8 @@ Just open the project root in Android Studio.
 
 Push a tag starting with `v` (e.g. `git tag v0.1.3 && git push origin v0.1.3`). `.github/workflows/release.yml` stamps the version, builds a properly signed APK, and creates a GitHub Release with it attached. The signing key is not stored in the repo — CI restores it from repository Secrets (`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`), so releases share one stable signature and users can upgrade in place.
 
-Tags strictly follow `v<versionName>` (e.g. `v0.1.3`). F-Droid's `AutoUpdateMode: Version v%v` / `UpdateCheckMode: Tags` relies on this naming to discover and build new versions — do not change the format.
+Tags follow `v<versionName>` (e.g. `v0.1.3`) consistently so version-identifying tools can recognize releases.
 
-## F-Droid
-
-This app is GPL-3.0, has no `INTERNET` permission, makes no network calls, and has no proprietary dependencies; it builds independently from source and is suitable for F-Droid. The F-Droid metadata (`.yml`) lives in F-Droid's official `fdroiddata` repository following that repo's submission process. The app source is maintained only in this GitHub repository — F-Droid pulls by tag, builds, and signs with its own key. Consequently the F-Droid build and the GitHub Release have different signatures; switching between them on one device requires uninstalling the other first.
 
 ## Contributing
 
