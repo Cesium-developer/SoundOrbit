@@ -173,12 +173,15 @@ public final class CaptureEngine {
                 return -2;
             }
 
-            // 播回用 ASSISTANT usage：它的音量不随 STREAM_MUSIC 静音，
-            // 这样"静音媒体 stream 掐原声"后，处理后的声音仍能从蓝牙正常出。
+            // 播回用 USAGE_ASSISTANT + CONTENT_TYPE_SPEECH：必须配 SPEECH。
+            // 在部分 ROM（如一加 ColorOS / Android 15）上，CONTENT_TYPE_MUSIC + USAGE_ASSISTANT
+            // 会被 audio policy 归到 STRATEGY_MEDIA 的 STREAM_MUSIC 组，导致
+            // setStreamMute(STREAM_MUSIC) 把播回一起静音 -> 完全没声音。
+            // 而 SPEECH + USAGE_ASSISTANT 映射到独立的 AUDIO_STREAM_ASSISTANT，不受影响。
             track = new AudioTrack.Builder()
                     .setAudioAttributes(new AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_ASSISTANT)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                             .build())
                     .setAudioFormat(new AudioFormat.Builder()
                             .setSampleRate(rate)
