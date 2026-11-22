@@ -182,8 +182,7 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
                 + ", ratio=" + format(Prefs.getRatio(this)) + "\n"
                 + getString(R.string.diag_battery) + (batteryIgnored ? getString(R.string.diag_joined) : getString(R.string.diag_not_joined)) + "\n"
                 + getString(R.string.diag_a11y) + (a11yOn ? getString(R.string.diag_on) : getString(R.string.diag_off)) + "\n"
-                + getString(R.string.diag_global_effect) + "\n"
-                + getString(R.string.diag_mono);
+                + getString(R.string.diag_global_effect);
         diagText.setText(info);
     }
 

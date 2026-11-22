@@ -95,7 +95,6 @@
     <string name="diag_on">已开启</string>
     <string name="diag_off">未开启</string>
     <string name="diag_global_effect">系统全局效果: DynamicsProcessing / session 0</string>
-    <string name="diag_mono">预转单声道: 系统不支持（见下方说明）</string>
     <string name="capture_channel">音频捕获</string>
     <string name="capture_notif_title">正在捕获音频</string>
     <string name="capture_notif_text">用于实时环绕声处理</string>
@@ -108,4 +107,5 @@
     <string name="hrtf_notch_r">耳廓陷波锐度（0.5–0.95）</string>
     <string name="hrtf_reset_default">恢复默认参数</string>
     <string name="hrtf_bad_value">参数不合法，已恢复该项默认值</string>
+    <string name="no_browser">设备上没有可用的浏览器</string>
 </resources>

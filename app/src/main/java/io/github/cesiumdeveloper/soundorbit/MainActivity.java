@@ -108,8 +108,13 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 browser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 if (browser.resolveActivity(getPackageManager()) != null) {
                     startActivity(browser);
+                } else {
+                    android.widget.Toast.makeText(this, R.string.no_browser,
+                            android.widget.Toast.LENGTH_SHORT).show();
                 }
-            } catch (Throwable ignored) {
+            } catch (Throwable t) {
+                android.widget.Toast.makeText(this, R.string.no_browser,
+                        android.widget.Toast.LENGTH_SHORT).show();
             }
         });
 

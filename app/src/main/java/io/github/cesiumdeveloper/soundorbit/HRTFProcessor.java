@@ -86,8 +86,10 @@ public final class HRTFProcessor {
         // ITD 用分数延迟 + 线性插值，不做整数取整：旋转时不再跳档、无颗粒感。
         double maxItdSamples = (params.maxItdMs / 1000.0) * RATE * strength;
         double itd = maxItdSamples * Math.sin(az) * cosEl;
-        double itdL = Math.max(0, -itd);
-        double itdR = Math.max(0, itd);
+        // sin(az)>0 = 声源在右 => 右耳先到，应延迟【左】声道（远耳）。
+        // 反过来则延迟右声道。旧写法把延迟加在近耳，导致 ITD 与 ILD 指向相反、声像混乱偏侧。
+        double itdL = Math.max(0, itd);
+        double itdR = Math.max(0, -itd);
         int dLi = (int) Math.floor(itdL);
         int dRi = (int) Math.floor(itdR);
         float dLf = (float) (itdL - dLi);
