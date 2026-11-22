@@ -51,16 +51,46 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 | Radius (0–1) | Smaller = closer to the head, stronger binaural cues | Binaural |
 | Elevation (°) | -60 to 60, source above or below | Binaural |
 
-> Binaural mode uses only `period + start azimuth + radius + elevation`; depth and ratio have no effect on it (noted in the UI as well).
+> Binaural **source motion** uses only `period + start azimuth + radius + elevation`; depth and ratio have no effect on it (noted in the UI). Output DSP (soft limiter, EQ, bass enhancement) still applies before binaural output.
 
 ### DSP settings (Settings · Advanced)
 
-Collapsed by default under **Settings → DSP settings (advanced)**, containing two sections:
+Collapsed by default under **Settings → DSP settings (advanced)**, containing three sections, all for spatial audio:
 
-- **Output processing**: soft-limiter threshold, bass-enhancement strength;
-- **HRTF settings (spatial rendering)**: low-level binaural controls — bad values may break positioning or volume. Out-of-range values are clamped automatically with a *Reset to defaults* button. Defaults are recommended.
+1. **Output processing · soft limiter**: limiter threshold, bass-enhancement strength;
+2. **Graphic equalizer (10 bands)**: 10 band gains and preset management;
+3. **HRTF settings (spatial rendering)**: low-level binaural controls.
 
-The table below lists the HRTF parameters; output-processing parameters are described above.
+These are for fine-tuning — bad values may make audio muffled, distorted, or break positioning. Out-of-range values are clamped and each section has a reset button. Defaults are recommended.
+
+#### Output-processing parameters
+
+| Parameter | Meaning | Default | Range |
+|---|---|---|---|
+| Soft-limiter threshold | Audio below the threshold passes untouched; only peaks are smoothly compressed with tanh to prevent clipping. Lower = earlier engagement, more conservative sound | 0.89 (-1 dBTP) | 0.1–0.99 |
+| Bass enhancement strength | Psychoacoustic bass: harmonics imply low notes on small speakers; 0 = off, too high may distort | 0 (off) | 0–1 |
+
+#### Graphic equalizer (10 bands)
+
+ISO octave center frequencies, in dB, flat (0) by default:
+
+| Band | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Frequency (Hz) | 31.5 | 63 | 125 | 250 | 500 | 1k | 2k | 4k | 8k | 16k |
+
+Each band's gain ranges ±12 dB (positive boosts, negative cuts).
+
+**Preset behavior** (important):
+
+- The dropdown has three kinds of entries: **No preset (all zero)**, **Custom (unsaved)**, and any presets you saved;
+- **Selecting a preset only fills the input fields as a draft — it does not take effect**; you must tap *Apply preset (to audio)* to write it to the engine and get a confirmation toast;
+- On apply, if the current values differ from the selected preset, the dropdown switches to *Custom (unsaved)* (or *No preset* if all zero) — so after editing preset A you can naturally re-select A from the dropdown to restore its original values;
+- *Save current as new preset*: names and saves the current 10 bands (unlimited count); saving also applies the current values;
+- *Delete current preset*: removes the currently selected saved preset (No preset / Custom entries cannot be deleted);
+- *Reset EQ*: zeros all 10 bands as a draft and switches to *No preset*; still needs Apply to take effect;
+- **Leaving Settings without tapping Apply discards the draft — the engine keeps the previously applied values.**
+
+#### HRTF parameters
 
 | Parameter | Meaning | Default | Range |
 |---|---|---|---|
@@ -69,7 +99,7 @@ The table below lists the HRTF parameters; output-processing parameters are desc
 | Head-shadow strength | High-frequency attenuation on the far ear, a spatial cue | 0.55 | 0–1 |
 | Pinna notch sharpness | Spectrum-notch bandwidth behind front/back and up/down cues; closer to 1 = narrower and deeper | 0.8 | 0.5–0.95 |
 
-> Changes apply on returning to the main screen (next audio frame even while running). If you mess things up, tap *Reset to defaults*.
+> **When changes apply**: soft-limiter threshold and bass strength save on returning to the main screen; EQ edits are drafts and only take effect after tapping *Apply preset*; HRTF changes apply on returning to the main screen (next frame). All are locked while surround is on. If you mess things up, tap the corresponding reset button.
 
 ## Usage
 
@@ -96,16 +126,25 @@ The table below lists the HRTF parameters; output-processing parameters are desc
 ## Build
 
 ```bash
-./gradlew :app:assembleDebug
+./gradlew :app:assembleDebug     # debug APK
+./gradlew :app:assembleRelease   # release APK (unsigned, for F-Droid/CI to sign)
 ```
 
-The APK lands in `app/build/outputs/apk/debug/`. Requires Android SDK (API 34) and JDK 17. The project uses the Gradle Wrapper + AGP 8.6.1, with `compileSdk 34`, `minSdk 29`, `targetSdk 34`.
+APKs land in `app/build/outputs/apk/debug/` and `app/build/outputs/apk/release/` (the latter as `app-release-unsigned.apk`). Requires Android SDK (API 34) and JDK 17. The project uses the Gradle Wrapper + AGP 8.6.1, with `compileSdk 34`, `minSdk 29`, `targetSdk 34`. The Android module is in the `app/` subdirectory.
+
+**Reproducible builds**: `build.gradle` reads signing keys only from environment variables (`SIGN_KEYSTORE`, etc.). Local and F-Droid builds do not inject these, so they produce an unsigned APK that F-Droid signs with its own key. No signing keys or machine-specific absolute paths live in the source tree (`local.properties` is gitignored). No network dependencies, no proprietary SDKs, AndroidX-only — suitable for independent source builds.
 
 Just open the project root in Android Studio.
 
 ## Releasing
 
-Push a tag starting with `v` (e.g. `git tag v0.1.0 && git push origin v0.1.0`). `.github/workflows/release.yml` stamps the version, builds a properly signed APK, and creates a GitHub Release with it attached. The signing key is not stored in the repo — CI restores it from repository Secrets (`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`), so releases share one stable signature and users can upgrade in place.
+Push a tag starting with `v` (e.g. `git tag v0.1.3 && git push origin v0.1.3`). `.github/workflows/release.yml` stamps the version, builds a properly signed APK, and creates a GitHub Release with it attached. The signing key is not stored in the repo — CI restores it from repository Secrets (`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`), so releases share one stable signature and users can upgrade in place.
+
+Tags strictly follow `v<versionName>` (e.g. `v0.1.3`). F-Droid's `AutoUpdateMode: Version v%v` / `UpdateCheckMode: Tags` relies on this naming to discover and build new versions — do not change the format.
+
+## F-Droid
+
+This app is GPL-3.0, has no `INTERNET` permission, makes no network calls, and has no proprietary dependencies; it builds independently from source and is suitable for F-Droid. The F-Droid metadata (`.yml`) lives in F-Droid's official `fdroiddata` repository following that repo's submission process. The app source is maintained only in this GitHub repository — F-Droid pulls by tag, builds, and signs with its own key. Consequently the F-Droid build and the GitHub Release have different signatures; switching between them on one device requires uninstalling the other first.
 
 ## Contributing
 

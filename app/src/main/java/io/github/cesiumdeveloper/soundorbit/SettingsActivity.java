@@ -253,7 +253,8 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
                 dspSoftThresholdField, hrtfMaxItdField, hrtfIldField,
                 hrtfShadowField, hrtfNotchRField,
                 findViewById(R.id.dspReset), findViewById(R.id.eqReset), findViewById(R.id.hrtfReset),
-                eqPresetSpinner, findViewById(R.id.eqPresetSave), findViewById(R.id.eqPresetDelete),
+                eqPresetSpinner, findViewById(R.id.eqPresetApply),
+                findViewById(R.id.eqPresetSave), findViewById(R.id.eqPresetDelete),
                 bassField
         };
         for (android.view.View v : guarded) if (v != null) v.setOnTouchListener(guard);

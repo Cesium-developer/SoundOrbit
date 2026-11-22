@@ -1,0 +1,1 @@
+0.1.3: added soft limiter (prevents clipping), 10-band graphic EQ with custom presets, psychoacoustic bass enhancement, top-down binaural visualization for true surround, and a runtime guard that locks sound settings while surround is on.
