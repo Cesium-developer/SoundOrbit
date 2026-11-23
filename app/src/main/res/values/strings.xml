@@ -4,6 +4,7 @@
     <string name="main_title">实时环绕声</string>
     <string name="main_subtitle">实时把单声道变成两耳绕行 · 最适合 ASMR，不限于 ASMR</string>
     <string name="capture_authorized">已授权音频捕获</string>
+    <string name="capture_stop">停止捕获</string>
     <string name="capture_unauthorized">未授权（点击授权）</string>
     <string name="tile_label">实时环绕</string>
     <string name="depth_label">程度（摆幅，建议 20）</string>

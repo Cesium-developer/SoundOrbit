@@ -119,7 +119,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
         captureAuth.setOnClickListener(v -> {
             if (captureEngine.isAuthorized()) {
-                captureStatus.setText(R.string.capture_authorized);
+                // 已授权：提供 App 内停止入口，避免只能去通知栏划掉（那会导致授权状态死锁）
+                captureEngine.release();
+                refreshStatus();
             } else {
                 captureEngine.requestAuthorization(this);
             }
@@ -348,8 +350,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             }
         }
         toggle.setText(any ? R.string.disable : R.string.enable);
-        captureStatus.setText(captureEngine.isAuthorized()
-                ? R.string.capture_authorized : R.string.capture_unauthorized);
+        boolean authorized = captureEngine.isAuthorized();
+        captureStatus.setText(authorized ? R.string.capture_authorized : R.string.capture_unauthorized);
+        captureAuth.setText(authorized ? R.string.capture_stop : R.string.shizuku_auth);
     }
 
     @Override

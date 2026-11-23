@@ -75,6 +75,16 @@ public final class HRTFProcessor {
 
     public void processByPhase(short[] in, short[] out, int frames, double rotationPhase,
                                float azimuth0, float radius, float elevation, HrtfParams params) {
+        processByPhase(in, out, frames, rotationPhase, azimuth0, radius, elevation, params, 0, 0);
+    }
+
+    /**
+     * 分片版本：in[inOffset .. inOffset+frames) -> out[outOffset .. outOffset+frames*2)。
+     * 用于把一个大 buffer 切成小片、每片用各自的相位，降低块边界的方位跳变。
+     */
+    public void processByPhase(short[] in, short[] out, int frames, double rotationPhase,
+                               float azimuth0, float radius, float elevation, HrtfParams params,
+                               int inOffset, int outOffset) {
         if (params == null) params = HrtfParams.defaults();
         double azimuth = azimuth0 * Math.PI / 180.0;
         azimuth += 2.0 * Math.PI * rotationPhase;
@@ -132,7 +142,7 @@ public final class HRTFProcessor {
         int lenR = delayR.length;
 
         for (int i = 0; i < frames; i++) {
-            float mono = in[i] / 32768f;
+            float mono = in[inOffset + i] / 32768f;
 
             delayL[wL] = mono;
             delayR[wR] = mono;
@@ -167,8 +177,8 @@ public final class HRTFProcessor {
             vL = yL;
             vR = yR;
 
-            out[i * 2] = clamp16(vL);
-            out[i * 2 + 1] = clamp16(vR);
+            out[outOffset + i * 2] = clamp16(vL);
+            out[outOffset + i * 2 + 1] = clamp16(vR);
         }
     }
 

@@ -63,6 +63,9 @@ public final class CaptureEngine {
     private float randMin;
     private float randMax;
     private Runnable authCallback;
+    // 看门狗：主动停止时不把"授权失效"当成异常；区分主动/被动，避免回调递归
+    private volatile boolean stoppingByApp = false;
+    private volatile boolean handlingLoss = false;
 
     private android.media.AudioManager audioManager;
     private int savedMusicVolume;
@@ -72,6 +75,7 @@ public final class CaptureEngine {
     public CaptureEngine(Context c) {
         this.app = c.getApplicationContext();
         this.audioManager = (android.media.AudioManager) app.getSystemService(Context.AUDIO_SERVICE);
+        CaptureFgService.boundEngine = this;
     }
 
     /** 从 App 自己的 Activity 发起授权 */
@@ -109,6 +113,16 @@ public final class CaptureEngine {
                         (MediaProjectionManager) c.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
                 projection = mpm.getMediaProjection(rc, d);
                 lastError = null;
+                // 看门狗：系统/用户从通知栏掐断捕获时，MediaProjection 会回调 onStop。
+                // 这里把授权状态、运行状态一并清掉，避免"实际没授权、UI 却显示已授权"
+                // 的死锁（旧版必须杀进程才能重新授权）。
+                final MediaProjection p = projection;
+                p.registerCallback(new MediaProjection.Callback() {
+                    @Override
+                    public void onStop() {
+                        onProjectionLost();
+                    }
+                }, new android.os.Handler(android.os.Looper.getMainLooper()));
                 Log.i(TAG, "media projection acquired");
             } catch (Throwable t) {
                 lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_get_capture_failed, String.valueOf(t.getMessage()));
@@ -120,6 +134,31 @@ public final class CaptureEngine {
 
     public boolean isAuthorized() {
         return projection != null;
+    }
+
+    /**
+     * 看门狗：MediaProjection 被系统回收（如用户从通知栏停止捕获）时回调。
+     * 清掉授权状态和引擎运行态，并通知 UI 刷新——这样 UI 不再谎报"已授权"，
+     * 用户可以直接重新点授权，无需杀进程。
+     */
+    private void onProjectionLost() {
+        if (stoppingByApp || handlingLoss) return; // 主动停止或已在处理，避免递归
+        handlingLoss = true;
+        try {
+            projection = null;
+            lastError = null;
+            stop();
+            if (authCallback != null) authCallback.run();
+            Log.i(TAG, "projection lost (watchdog)");
+        } finally {
+            handlingLoss = false;
+        }
+    }
+
+    /** 前台服务被销毁（用户划掉通知）时调用：捕获授权已失效，同步清理状态 */
+    public void notifyServiceStopped() {
+        if (stoppingByApp) return;
+        onProjectionLost();
     }
 
     public String getLastError() {
@@ -154,9 +193,9 @@ public final class CaptureEngine {
             int rate = 48000;
             int chIn = AudioFormat.CHANNEL_IN_STEREO;
             int fmt = AudioFormat.ENCODING_PCM_16BIT;
-            // 20ms 一帧（原 40ms）：周期短时方位/增益的阶梯感减半，旋转更平滑。
-            // AudioTrack/AudioRecord 缓冲同步减半，仍是 48k 下的常规大小。
-            int frames = rate * 20 / 1000;
+            // 40ms 一帧：缓冲大一些，降低 Java 层调度抖动导致的欠载(underrun)风险。
+            // 20ms 时钢琴曲的干净瞬态处出现过轻微点状杂音，改回 40ms 验证。
+            int frames = rate * 40 / 1000;
             int byteBuf = frames * 2 * 2;
 
             AudioPlaybackCaptureConfiguration cfg =
@@ -351,12 +390,20 @@ public final class CaptureEngine {
         }
     }
 
+    /** 主动停止捕获：释放引擎 + 丢弃授权，避免触发看门狗回调重复清理 */
     public void release() {
-        stop();
-        if (projection != null) {
-            try { projection.stop(); } catch (Throwable ignored) {}
-            projection = null;
+        stoppingByApp = true;
+        try {
+            stop();
+            if (projection != null) {
+                try { projection.stop(); } catch (Throwable ignored) {}
+                projection = null;
+            }
+            lastError = null;
+        } finally {
+            stoppingByApp = false;
         }
+        if (authCallback != null) authCallback.run();
     }
 
     public void update(float d, float p, float r, int m) {
@@ -443,6 +490,9 @@ public final class CaptureEngine {
         short[] monoR = new short[frames];
         short[] outR = new short[frames * 2];
         short[] eqOut = new short[frames * 2];
+        // 真环绕相位切片：把一帧切成小片、每片单独推进相位，避免整帧共用一个相位
+        // 造成块边界方位跳变（钢琴/雨声等干净瞬态处的点状杂音）。缓冲循环外分配。
+        final int sliceFrames = 96; // 2ms @48k
         long startNs = System.nanoTime();
         long diagAt = 0;
         int diagInPeak = 0;
@@ -450,12 +500,11 @@ public final class CaptureEngine {
         int diagWrites = 0;
         try {
             while (running) {
-                int n = rec.read(buf, 0, buf.length);
+                int n = rec.read(buf, 0, buf.length);  // 阻塞等数据，不计入处理耗时
                 if (n <= 0) continue;
                 int sampleFrames = n / 2;
 
                 double t = (System.nanoTime() - startNs) / 1_000_000_000.0;
-                double phase = randomizer.advance(t);
 
                 if (isHrtf(mode)) {
                     // 分离左右输入
@@ -463,39 +512,45 @@ public final class CaptureEngine {
                         monoL[i] = buf[i * 2];
                         monoR[i] = buf[i * 2 + 1];
                     }
-                    if (mode == MODE_HRTF_STEREO) {
-                        // 立体声直接输入：L/R 两个独立声源，起始方位相差 180°，各自绕头后叠加
-                        hrtf.processByPhase(monoL, buf, sampleFrames, phase,
-                                hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams);
-                        hrtfR.processByPhase(monoR, outR, sampleFrames, phase,
-                                hrtfAzimuth + 180f, hrtfRadius, hrtfElevation, hrtfParams);
-                        for (int i = 0; i < sampleFrames * 2; i++) {
-                            int sum = buf[i] + outR[i];
-                            buf[i] = clampSample(sum * 0.5f);
+                    if (mode == MODE_HRTF_MIX) {
+                        for (int i = 0; i < sampleFrames; i++) {
+                            monoL[i] = clampSample((monoL[i] + monoR[i]) * 0.5f);
                         }
-                    } else {
-                        // 取左 / 取右 / 合成单声道：一个声源绕头
-                        short[] src;
-                        if (mode == MODE_HRTF_LEFT) {
-                            src = monoL;
-                        } else if (mode == MODE_HRTF_RIGHT) {
-                            src = monoR;
-                        } else { // MODE_HRTF_MIX：L+R 合成单声道
-                            for (int i = 0; i < sampleFrames; i++) {
-                                monoL[i] = clampSample((monoL[i] + monoR[i]) * 0.5f);
-                            }
-                            src = monoL;
-                        }
-                        hrtf.processByPhase(src, buf, sampleFrames, phase,
-                                hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams);
                     }
-                    // 可视化：真环绕画声源绕头方位（起始方位 + 360°*相位）
-                    EffectState.phase = (float) phase;
-                    EffectState.tri = (float) phase;
+                    // 相位切片：一帧切成多片，每片按自己的时间点推进相位。
+                    // 时间从帧起点倒推（t 是读完时刻，数据覆盖之前的 sampleFrames 帧）。
+                    double frameStartSec = t - sampleFrames / 48000.0;
+                    double sliceSec = sliceFrames / 48000.0;
+                    double lastPhase = 0.0;
+                    for (int off = 0; off < sampleFrames; off += sliceFrames) {
+                        int len = Math.min(sliceFrames, sampleFrames - off);
+                        double sliceT = frameStartSec + off / 48000.0;
+                        double ph = randomizer.advance(sliceT);
+                        lastPhase = ph;
+                        int monoOff = off, outOff = off * 2;
+                        if (mode == MODE_HRTF_STEREO) {
+                            // 立体声直接输入：L/R 各自独立绕头，起始方位相差 180°，叠加
+                            hrtf.processByPhase(monoL, buf, len, ph,
+                                    hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams, monoOff, outOff);
+                            hrtfR.processByPhase(monoR, outR, len, ph,
+                                    hrtfAzimuth + 180f, hrtfRadius, hrtfElevation, hrtfParams, monoOff, outOff);
+                            for (int i = outOff; i < outOff + len * 2; i++) {
+                                int sum = buf[i] + outR[i];
+                                buf[i] = clampSample(sum * 0.5f);
+                            }
+                        } else {
+                            short[] src = (mode == MODE_HRTF_RIGHT) ? monoR : monoL;
+                            hrtf.processByPhase(src, buf, len, ph,
+                                    hrtfAzimuth, hrtfRadius, hrtfElevation, hrtfParams, monoOff, outOff);
+                        }
+                    }
+                    // 可视化：真环绕画声源绕头方位（用本帧最后一片的相位）
+                    EffectState.phase = (float) lastPhase;
+                    EffectState.tri = (float) lastPhase;
                     EffectState.gainL = 1f;
                     EffectState.gainR = 1f;
                     EffectState.hrtfMode = true;
-                    EffectState.srcAzimuth = hrtfAzimuth + (float) (phase * 360.0);
+                    EffectState.srcAzimuth = hrtfAzimuth + (float) (lastPhase * 360.0);
                     EffectState.srcElevation = hrtfElevation;
                     EffectState.dualSource = (mode == MODE_HRTF_STEREO);
                     EffectState.depth = depth;
@@ -508,6 +563,8 @@ public final class CaptureEngine {
                     if (!writeTrack(buf, sampleFrames * 2)) break;
                     continue;
                 }
+
+                double phase = randomizer.advance(t);
 
                 // 与轻量引擎共用同一份算法（相位来自周期随机器）
                 float[] g = SurroundMath.gainsFromPhase(depth, ratio, phase);

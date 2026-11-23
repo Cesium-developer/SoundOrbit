@@ -4,6 +4,7 @@
     <string name="main_title">SoundOrbit</string>
     <string name="main_subtitle">Turn mono into two-ear orbiting in real time · Made for ASMR, not limited to it</string>
     <string name="capture_authorized">Audio capture authorized</string>
+    <string name="capture_stop">Stop capture</string>
     <string name="capture_unauthorized">Not authorized (tap to authorize)</string>
     <string name="tile_label">SoundOrbit</string>
     <string name="depth_label">Depth (amplitude, suggested 20)</string>

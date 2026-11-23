@@ -11,8 +11,8 @@ android {
         applicationId 'io.github.cesiumdeveloper.soundorbit'
         minSdk 29
         targetSdk 34
-        versionCode 103
-        versionName '0.1.3'
+        versionCode 104
+        versionName '0.1.4'
     }
 
     signingConfigs {
@@ -34,6 +34,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 测试包用独立包名，可与正式版共存，便于长期真机验证
+            applicationIdSuffix '.debug'
+        }
         release {
             minifyEnabled false
             // 仅当 CI 注入签名密钥时用正式签名；本地无密钥则构建 unsigned（可自行签名）
