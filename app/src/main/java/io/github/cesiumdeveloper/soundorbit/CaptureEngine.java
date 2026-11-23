@@ -75,7 +75,6 @@ public final class CaptureEngine {
     public CaptureEngine(Context c) {
         this.app = c.getApplicationContext();
         this.audioManager = (android.media.AudioManager) app.getSystemService(Context.AUDIO_SERVICE);
-        CaptureFgService.boundEngine = this;
     }
 
     /** 从 App 自己的 Activity 发起授权 */
@@ -153,12 +152,6 @@ public final class CaptureEngine {
         } finally {
             handlingLoss = false;
         }
-    }
-
-    /** 前台服务被销毁（用户划掉通知）时调用：捕获授权已失效，同步清理状态 */
-    public void notifyServiceStopped() {
-        if (stoppingByApp) return;
-        onProjectionLost();
     }
 
     public String getLastError() {
@@ -298,9 +291,14 @@ public final class CaptureEngine {
             track = null;
         }
         muteMedia(false);
+        // App 主动停服务（停止环绕声/停止捕获）不算授权失效，看门狗必须跳过，
+        // 否则"停止环绕声"会误清授权状态。用户从通知栏划掉服务才走 onDestroy→看门狗。
+        stoppingByApp = true;
         try {
             app.stopService(new Intent(app, CaptureFgService.class));
         } catch (Throwable ignored) {
+        } finally {
+            stoppingByApp = false;
         }
     }
 

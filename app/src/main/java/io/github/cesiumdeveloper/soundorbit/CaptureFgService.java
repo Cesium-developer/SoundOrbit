@@ -10,8 +10,6 @@ import android.os.IBinder;
 /** MediaProjection 必需的 mediaProjection 类型前台服务 */
 public class CaptureFgService extends Service {
     private static final String CHANNEL = "capture_fg";
-    // 引擎引用：服务被用户从通知栏划掉时，通知引擎同步清理授权状态
-    static volatile CaptureEngine boundEngine;
 
     @Override
     public void onCreate() {
@@ -41,10 +39,9 @@ public class CaptureFgService extends Service {
 
     @Override
     public void onDestroy() {
-        // 用户从通知栏划掉服务 = 捕获授权失效。通知引擎清状态、刷 UI，
-        // 避免"实际没授权但显示已授权"必须杀进程的死锁。
-        CaptureEngine e = boundEngine;
-        if (e != null) e.notifyServiceStopped();
+        // 授权失效由 MediaProjection.Callback.onStop 统一判定——系统撤销授权时它必然触发。
+        // 这里不再主动清授权：App 自己停止服务时授权其实还在（只是没在跑），
+        // 若在这里清会出现"停止环绕声=停止授权"的误判。
         stopForeground(true);
         super.onDestroy();
     }
