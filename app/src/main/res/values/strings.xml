@@ -2,13 +2,13 @@
 <resources>
     <string name="app_name">实时环绕声</string>
     <string name="main_title">实时环绕声</string>
-    <string name="main_subtitle">实时把单声道变成两耳绕行 · 最适合 ASMR，不限于 ASMR</string>
+    <string name="main_subtitle">让正在播放的声音带上环绕感 · 音乐、视频、单声道内容都适用</string>
     <string name="capture_authorized">已授权音频捕获</string>
     <string name="capture_stop">停止捕获</string>
     <string name="capture_unauthorized">未授权（点击授权）</string>
     <string name="tile_label">实时环绕</string>
-    <string name="depth_label">程度（摆幅，建议 20）</string>
-    <string name="period_label">周期（秒，建议 20）</string>
+    <string name="depth_label">程度（摆幅）</string>
+    <string name="period_label">周期（秒）</string>
     <string name="period_random_enable">周期随机范围（勾选后周期变成范围，每轮在范围内随机）</string>
     <string name="period_random_min">周期下限（秒）</string>
     <string name="period_random_max">周期上限（秒）</string>
@@ -45,13 +45,14 @@
     <string name="engine_native">轻量（session 0，零延迟，左右摆动）</string>
     <string name="engine_shizuku">高级（内录捕获，伪环绕 / 真环绕）</string>
     <string name="channel_label">环绕方式（仅高级引擎）</string>
-    <string name="channel_left">伪环绕 · 只取左 → 双耳（复制声道 + 左右增益摆动，无前后方位）</string>
-    <string name="channel_right">伪环绕 · 只取右 → 双耳（复制声道 + 左右增益摆动，无前后方位）</string>
-    <string name="channel_mix">伪环绕 · 双声道合成单声道 → 双耳（先合成再摆动）</string>
-    <string name="channel_hrtf">真环绕 · 立体声直接输入（L/R 各自独立绕头）</string>
-    <string name="channel_hrtf_left">真环绕 · 取左声道源（单声道绕头）</string>
-    <string name="channel_hrtf_right">真环绕 · 取右声道源（单声道绕头）</string>
-    <string name="channel_hrtf_mix">真环绕 · 双声道合成单声道绕头（先合成再绕）</string>
+    <string name="channel_type_label">环绕类型</string>
+    <string name="channel_type_pan">伪环绕（左右增益摆动，无前后方位）</string>
+    <string name="channel_type_hrtf">真环绕（双耳空间渲染，有前后上下方位）</string>
+    <string name="channel_source_label">取源方式</string>
+    <string name="channel_src_stereo">立体声直入（左右声道各自独立处理）</string>
+    <string name="channel_src_mix">合成单声道（左右混合为一路）</string>
+    <string name="channel_src_left">只取左声道（左右不搭的音源可用）</string>
+    <string name="channel_src_right">只取右声道（左右不搭的音源可用）</string>
     <string name="hrtf_params">真环绕声参数（旋转周期用上面的"周期"；程度/时间比对真环绕不起作用）</string>
     <string name="hrtf_azimuth">起始方位（度，0前/90右/180后/270左）</string>
     <string name="hrtf_radius">半径（0贴头~1远，越小双耳差越强）</string>
@@ -85,7 +86,7 @@
     <string name="err_no_audio_permission">缺少系统音频设置权限</string>
     <string name="err_unknown">未知错误</string>
     <string name="notification_failed">启动失败：%s</string>
-    <string name="notification_params">程度 %s  周期 %ss  时间比 %s</string>
+    <string name="notification_params">程度 %1$s  周期 %2$ss  时间比 %3$s</string>
     <string name="diag_device">设备: </string>
     <string name="diag_effect_running">效果运行中: </string>
     <string name="diag_current_params">当前参数: depth=</string>
@@ -101,7 +102,7 @@
     <string name="capture_notif_text">用于实时环绕声处理</string>
     <string name="settings_advanced">发烧友参数 · HRTF（高级）</string>
     <string name="settings_advanced_warn">警告：仅发烧友专用。错误取值会导致定位错乱或音量异常，改坏可点"恢复默认"。</string>
-    <string name="settings_advanced_hint">以下为双耳空间渲染（HRTF）的底层参数，默认值即推荐值。修改后返回主界面生效。</string>
+    <string name="settings_advanced_hint">以下为双耳空间渲染（HRTF）的底层参数。修改后返回主界面生效。</string>
     <string name="dsp_toggle">DSP 设置（高级）</string>
     <string name="dsp_sub_output">输出处理 · 软限幅</string>
     <string name="dsp_sub_hrtf">HRTF 设置（空间渲染）</string>
@@ -128,6 +129,18 @@
     <string name="eq_preset_deleted">已删除</string>
     <string name="eq_preset_empty">还没有预设</string>
     <string name="eq_preset_apply">应用预设（生效到声音）</string>
+    <string name="eq_builtin_flat">均衡</string>
+    <string name="eq_builtin_bass">低音增强</string>
+    <string name="eq_builtin_treble">高音增强</string>
+    <string name="eq_builtin_vocal">人声清晰</string>
+    <string name="eq_builtin_podcast">播客/语音</string>
+    <string name="eq_builtin_pop">流行</string>
+    <string name="eq_builtin_rock">摇滚</string>
+    <string name="eq_builtin_hiphop">嘻哈/电子</string>
+    <string name="eq_builtin_classical">古典</string>
+    <string name="eq_builtin_loudness">响度补偿</string>
+    <string name="eq_builtin_asmr_whisper">ASMR · 耳语</string>
+    <string name="eq_builtin_asmr_tapping">ASMR · 敲击</string>
     <string name="eq_preset_none">无预设（全 0）</string>
     <string name="eq_preset_custom">自定义（未保存）</string>
     <string name="eq_preset_applied">已应用到声音</string>

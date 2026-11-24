@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical">
+
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +24,7 @@
             android:text="@string/main_title"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="#263238" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:id="@+id/subtitle"
@@ -25,7 +33,7 @@
             android:layout_marginTop="4dp"
             android:text="@string/main_subtitle"
             android:textSize="13sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -41,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/status_idle"
                 android:textSize="16sp"
-                android:textColor="#263238" />
+                android:textColor="@color/text_primary" />
 
             <io.github.cesiumdeveloper.soundorbit.SurroundVisualizerView
                 android:id="@+id/visualizer"
@@ -63,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/depth_label"
                 android:textSize="14sp"
-                android:textColor="#37474F" />
+                android:textColor="@color/text_primary" />
 
             <EditText
                 android:id="@+id/depth"
@@ -72,6 +80,11 @@
                 android:inputType="numberDecimal|numberSigned"
                 android:text="20"
                 android:textSize="18sp" />
+            <SeekBar
+                android:id="@+id/depthSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -79,7 +92,7 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/period_label"
                 android:textSize="14sp"
-                android:textColor="#37474F" />
+                android:textColor="@color/text_primary" />
 
             <EditText
                 android:id="@+id/period"
@@ -88,6 +101,11 @@
                 android:inputType="numberDecimal|numberSigned"
                 android:text="20"
                 android:textSize="18sp" />
+            <SeekBar
+                android:id="@+id/periodSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <CheckBox
                 android:id="@+id/periodRandomCheck"
@@ -108,13 +126,18 @@
                     android:layout_height="wrap_content"
                     android:text="@string/period_random_min"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
                 <EditText
                     android:id="@+id/periodRandomMin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
                     android:text="5" />
+                <SeekBar
+                    android:id="@+id/randMinSeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -122,13 +145,18 @@
                     android:layout_marginTop="6dp"
                     android:text="@string/period_random_max"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
                 <EditText
                     android:id="@+id/periodRandomMax"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
                     android:text="30" />
+                <SeekBar
+                    android:id="@+id/randMaxSeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
 
             <TextView
@@ -137,7 +165,7 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/ratio_label"
                 android:textSize="14sp"
-                android:textColor="#37474F" />
+                android:textColor="@color/text_primary" />
 
             <EditText
                 android:id="@+id/ratio"
@@ -146,6 +174,11 @@
                 android:inputType="numberDecimal|numberSigned"
                 android:text="1"
                 android:textSize="18sp" />
+            <SeekBar
+                android:id="@+id/ratioSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -161,7 +194,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/engine_label"
                 android:textSize="14sp"
-                android:textColor="#37474F" />
+                android:textColor="@color/text_primary" />
 
             <RadioGroup
                 android:id="@+id/engineGroup"
@@ -189,13 +222,35 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/channel_label"
                 android:textSize="14sp"
-                android:textColor="#37474F" />
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/channel_type_label"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+
+            <Spinner
+                android:id="@+id/channelTypeSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/channel_types" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/channel_source_label"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
 
             <Spinner
                 android:id="@+id/channelSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:entries="@array/channel_modes" />
+                android:entries="@array/channel_sources" />
 
             <LinearLayout
                 android:id="@+id/hrtfParams"
@@ -211,7 +266,7 @@
                     android:text="@string/hrtf_params"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#37474F" />
+                    android:textColor="@color/text_primary" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -219,13 +274,18 @@
                     android:layout_marginTop="6dp"
                     android:text="@string/hrtf_azimuth"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
                 <EditText
                     android:id="@+id/hrtfAzimuth"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal|numberSigned"
                     android:text="0" />
+            <SeekBar
+                android:id="@+id/azimuthSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -233,13 +293,18 @@
                     android:layout_marginTop="6dp"
                     android:text="@string/hrtf_radius"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
                 <EditText
                     android:id="@+id/hrtfRadius"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"
                     android:text="0.5" />
+            <SeekBar
+                android:id="@+id/radiusSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -247,13 +312,18 @@
                     android:layout_marginTop="6dp"
                     android:text="@string/hrtf_elevation"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
                 <EditText
                     android:id="@+id/hrtfElevation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal|numberSigned"
                     android:text="0" />
+            <SeekBar
+                android:id="@+id/elevationSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -270,7 +340,7 @@
                     android:layout_weight="1"
                     android:text="@string/shizuku_not_installed"
                     android:textSize="13sp"
-                    android:textColor="#78909C" />
+                    android:textColor="@color/text_secondary" />
 
                 <Button
                     android:id="@+id/shizukuAuth"
@@ -285,18 +355,10 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/shizuku_note"
                 android:textSize="11sp"
-                android:textColor="#9E9E9E" />
+                android:textColor="@color/text_muted" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/toggle"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginTop="20dp"
-            android:text="@string/enable"
-            android:textSize="18sp"
-            android:backgroundTint="#2962FF"
-            android:textColor="#FFFFFF" />
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -329,6 +391,18 @@
             android:layout_marginTop="16dp"
             android:text="@string/main_note"
             android:textSize="12sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
     </LinearLayout>
-</ScrollView>
+    </ScrollView>
+
+    <!-- 开关吸底：不随上方参数区滚动 -->
+    <Button
+        android:id="@+id/toggle"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="12dp"
+        android:text="@string/enable"
+        android:textSize="18sp"
+        android:backgroundTint="#2962FF"
+        android:textColor="@color/button_text" />
+</LinearLayout>

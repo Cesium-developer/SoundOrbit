@@ -22,6 +22,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     private Button toggle;
     private RadioGroup engineGroup;
     private Spinner channelSpinner;
+    private Spinner channelTypeSpinner;
     private TextView captureStatus;
     private Button captureAuth;
     private android.widget.LinearLayout hrtfParams;
@@ -55,6 +56,7 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         toggle = findViewById(R.id.toggle);
         engineGroup = findViewById(R.id.engineGroup);
         channelSpinner = findViewById(R.id.channelSpinner);
+        channelTypeSpinner = findViewById(R.id.channelTypeSpinner);
         captureStatus = findViewById(R.id.shizukuStatus);
         captureAuth = findViewById(R.id.shizukuAuth);
         hrtfParams = findViewById(R.id.hrtfParams);
@@ -87,17 +89,25 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
                 periodRandomRange.setVisibility(checked
                         ? android.view.View.VISIBLE : android.view.View.GONE));
 
-        channelSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+        // 滑块与数字框双向绑定（滑块有范围、数字框无范围）
+        bindAllSeeks();
+        // 可实时调整的参数：变化即推送引擎（防抖，避免滑块拖动时频繁写 Prefs）
+        installLiveParamWatchers();
+
+        android.widget.AdapterView.OnItemSelectedListener typeListener =
+                new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int pos, long id) {
-                hrtfParams.setVisibility(CaptureEngine.isHrtf(pos)
+                // 类型 0=伪环绕 1=真环绕；真环绕才显示 HRTF 参数区
+                hrtfParams.setVisibility(pos == 1
                         ? android.view.View.VISIBLE : android.view.View.GONE);
             }
 
             @Override
             public void onNothingSelected(android.widget.AdapterView<?> parent) {
             }
-        });
+        };
+        channelTypeSpinner.setOnItemSelectedListener(typeListener);
 
         toggle.setOnClickListener(v -> toggleEngine());
 
@@ -166,17 +176,17 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
             }
             return false;
         };
+        // 实时可调的参数不拦：depth/ratio/方位/半径/仰角，引擎每帧读 volatile，改了立即生效。
+        // 仍需停止才能改的：周期(改周期会重置相位导致声源瞬移)、周期随机开关/上下限(同理)、
+        // 引擎切换、取源方式(会重建延迟线)。
         android.view.View[] guarded = {
-                depthField, periodField, ratioField,
-                periodRandomCheck, periodRandomMinField, periodRandomMaxField,
-                hrtfAzimuthField, hrtfRadiusField, hrtfElevationField,
+                periodField, periodRandomCheck, periodRandomMinField, periodRandomMaxField,
                 findViewById(R.id.engineNative), findViewById(R.id.engineShizuku)
         };
         for (android.view.View v : guarded) if (v != null) v.setOnTouchListener(guard);
-        // Spinner：触摸拦截 + 选中回调里再挡一层（键盘/无障碍选择也能挡住）
-        if (channelSpinner != null) {
-            channelSpinner.setOnTouchListener(guard);
-        }
+        // 取源/类型 spinner 仍需停止才能改（切换会重置 HRTF 延迟线）
+        if (channelSpinner != null) channelSpinner.setOnTouchListener(guard);
+        if (channelTypeSpinner != null) channelTypeSpinner.setOnTouchListener(guard);
     }
 
     private boolean isCaptureMode() {
@@ -184,7 +194,9 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
     }
 
     private int channelMode() {
-        return channelSpinner.getSelectedItemPosition();
+        boolean hrtf = channelTypeSpinner.getSelectedItemPosition() == 1;
+        int source = channelSpinner.getSelectedItemPosition();
+        return CaptureEngine.modeFromSelection(hrtf, source);
     }
 
     private boolean randomEnabled() {
@@ -374,4 +386,85 @@ public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
         captureEngine.release();
         super.onDestroy();
     }
+    /**
+     * 滑块 ↔ 数字框双向绑定。
+     * 滑块用整数 progress，scale=100 表示一位以上小数（如 0.5 → 50）。
+     * 拖滑块：写入数字框（引擎读数字框）。
+     * 改数字框：值在 [min,max] 内则同步滑块；超出范围则滑块夹到边界，数字框保持用户输入（不限制自由输入）。
+     */
+    private void bindAllSeeks() {
+        bindSeek(R.id.depthSeek, depthField, 0f, 100f, 1);
+        bindSeek(R.id.periodSeek, periodField, 1f, 60f, 1);
+        bindSeek(R.id.ratioSeek, ratioField, 0.1f, 5f, 10);
+        bindSeek(R.id.azimuthSeek, hrtfAzimuthField, 0f, 360f, 1);
+        bindSeek(R.id.radiusSeek, hrtfRadiusField, 0f, 1f, 100);
+        bindSeek(R.id.elevationSeek, hrtfElevationField, -60f, 60f, 1);
+        bindSeek(R.id.randMinSeek, periodRandomMinField, 1f, 60f, 1);
+        bindSeek(R.id.randMaxSeek, periodRandomMaxField, 1f, 60f, 1);
+    }
+
+    private final android.os.Handler liveHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable liveApply = new Runnable() {
+        public void run() { applyParams(); }
+    };
+
+    /** 可实时参数变化时，防抖推送引擎（周期类不在其中——改周期会重置相位） */
+    private void installLiveParamWatchers() {
+        android.text.TextWatcher w = new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s,int a,int b,int c){}
+            public void onTextChanged(CharSequence s,int a,int b,int c){}
+            public void afterTextChanged(android.text.Editable e){
+                if (!EngineGuard.isRunning()) return; // 没在跑不用推
+                liveHandler.removeCallbacks(liveApply);
+                liveHandler.postDelayed(liveApply, 150);
+            }
+        };
+        depthField.addTextChangedListener(w);
+        ratioField.addTextChangedListener(w);
+        hrtfAzimuthField.addTextChangedListener(w);
+        hrtfRadiusField.addTextChangedListener(w);
+        hrtfElevationField.addTextChangedListener(w);
+    }
+
+    private void bindSeek(int barId, EditText field, final float min, final float max, final int scale) {
+        final android.widget.SeekBar bar = findViewById(barId);
+        if (bar == null) return;
+        bar.setMax(Math.round((max - min) * scale));
+
+        final android.text.TextWatcher watcher = new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
+            public void onTextChanged(CharSequence s, int a, int b, int c) {}
+            public void afterTextChanged(android.text.Editable e) {
+                if (bar.isPressed()) return; // 正在拖滑块，避免回写打架
+                float v;
+                try { v = Float.parseFloat(e.toString()); } catch (Throwable t) { return; }
+                float clamped = Math.max(min, Math.min(max, v));
+                int p = Math.round((clamped - min) * scale);
+                if (bar.getProgress() != p) bar.setProgress(p);
+            }
+        };
+        field.addTextChangedListener(watcher);
+
+        bar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(android.widget.SeekBar sb, int progress, boolean fromUser) {
+                if (!fromUser) return;
+                float v = min + progress / (float) scale;
+                String text = (scale == 100) ? String.format(java.util.Locale.US, "%.2f", v)
+                        : (scale == 10 ? String.format(java.util.Locale.US, "%.1f", v)
+                        : Integer.toString(Math.round(v)));
+                field.setText(text);
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar sb) {}
+            public void onStopTrackingTouch(android.widget.SeekBar sb) {}
+        });
+
+        // 初始化：按当前数字框的值设滑块位置（超范围夹到边界）
+        field.post(() -> {
+            float v;
+            try { v = Float.parseFloat(field.getText().toString()); } catch (Throwable t) { return; }
+            float clamped = Math.max(min, Math.min(max, v));
+            bar.setProgress(Math.round((clamped - min) * scale));
+        });
+    }
+
 }

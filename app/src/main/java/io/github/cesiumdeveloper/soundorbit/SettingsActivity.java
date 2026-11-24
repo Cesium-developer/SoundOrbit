@@ -34,6 +34,25 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
     private boolean eqPresetInit = true;
     private static final int[] EQ_IDS = {R.id.eq0, R.id.eq1, R.id.eq2, R.id.eq3, R.id.eq4,
             R.id.eq5, R.id.eq6, R.id.eq7, R.id.eq8, R.id.eq9};
+    private static final java.util.List<EqPresets.Builtin> BUILTINS = EqPresets.builtins();
+    private static final int BUILTIN_COUNT = BUILTINS.size();
+    private static final java.util.Map<String,Integer> BUILTIN_NAME_RES = new java.util.HashMap<>();
+    static {
+        BUILTIN_NAME_RES.put("flat",R.string.eq_builtin_flat);
+        BUILTIN_NAME_RES.put("bass",R.string.eq_builtin_bass);
+        BUILTIN_NAME_RES.put("treble",R.string.eq_builtin_treble);
+        BUILTIN_NAME_RES.put("vocal",R.string.eq_builtin_vocal);
+        BUILTIN_NAME_RES.put("podcast",R.string.eq_builtin_podcast);
+        BUILTIN_NAME_RES.put("pop",R.string.eq_builtin_pop);
+        BUILTIN_NAME_RES.put("rock",R.string.eq_builtin_rock);
+        BUILTIN_NAME_RES.put("hiphop",R.string.eq_builtin_hiphop);
+        BUILTIN_NAME_RES.put("classical",R.string.eq_builtin_classical);
+        BUILTIN_NAME_RES.put("loudness",R.string.eq_builtin_loudness);
+        BUILTIN_NAME_RES.put("asmr_whisper",R.string.eq_builtin_asmr_whisper);
+        BUILTIN_NAME_RES.put("asmr_tapping",R.string.eq_builtin_asmr_tapping);
+    }
+    private static final int[] EQ_SEEK_IDS = {R.id.eqSeek0, R.id.eqSeek1, R.id.eqSeek2, R.id.eqSeek3, R.id.eqSeek4,
+            R.id.eqSeek5, R.id.eqSeek6, R.id.eqSeek7, R.id.eqSeek8, R.id.eqSeek9};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,12 +100,14 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
             eqFields[i].setText("0");
         }
         loadEq();
+        bindEqSeeks();
+        bindParamSeeks();
         findViewById(R.id.eqReset).setOnClickListener(v -> {
-            // 只清零草稿并让下拉显示"无预设"；真正生效仍需点"应用预设"
+            // 只清零草稿并让下拉显示内置"均衡"(全0)；真正生效仍需点"应用预设"
             for (EditText f : eqFields) f.setText("0");
             refreshEqPresetSpinner(0);
         });
-        // EQ 预设：下拉项 = [无预设, 真实预设..., 自定义(未保存)]。
+        // EQ 预设：下拉项 = [内置均衡等12套, 用户预设..., 自定义(未保存)]。
         // 选择只填草稿不生效；点"应用预设"才写 Prefs 并据草稿更新下拉显示。
         eqPresetSpinner = findViewById(R.id.eqPresetSpinner);
         eqPresetAdapter = new android.widget.ArrayAdapter<>(this,
@@ -137,7 +158,7 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
                         Prefs.saveEqPresetsRaw(this, EqPresets.serialize(list));
                         saveEq(); // 保存为新预设同时应用当前值
                         // 真实预设从 index 1 开始（index 0 是无预设）
-                        refreshEqPresetSpinner(list.size());
+                        refreshEqPresetSpinner(BUILTIN_COUNT + list.size() - 1);
                         android.widget.Toast.makeText(this, R.string.eq_preset_saved,
                                 android.widget.Toast.LENGTH_SHORT).show();
                     })
@@ -146,10 +167,10 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
         });
         findViewById(R.id.eqPresetDelete).setOnClickListener(v -> {
             int pos = eqPresetSpinner.getSelectedItemPosition();
-            // 真实预设在 index 1..N；0=无预设，末位=自定义，都不可删
-            if (pos < 1 || pos > eqPresetList.size()) return;
+            // 用户预设在 index B..B+N-1；0..B-1=内置，末位=自定义，都不可删
+            if (pos < BUILTIN_COUNT || pos >= BUILTIN_COUNT + eqPresetList.size()) return;
             List<EqPresets.Preset> list = EqPresets.parse(Prefs.getEqPresetsRaw(this));
-            int presetIdx = pos - 1;
+            int presetIdx = pos - BUILTIN_COUNT;
             if (presetIdx >= list.size()) return;
             list.remove(presetIdx);
             Prefs.saveEqPresetsRaw(this, EqPresets.serialize(list));
@@ -174,8 +195,9 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
             Prefs.saveHrtfParams(this, d);
         });
 
-        // 守护：环绕声运行中，DSP/HRTF 参数不可更改（保活等设置不在此列）
-        installDspGuard();
+        // DSP/HRTF/EQ 参数允许运行中修改：引擎的 set 方法都支持运行中调用，
+        // 修改后返回主界面即生效（主界面 onResume → applyParams 推送引擎），无需停止环绕。
+        // 旧版 installDspGuard() 已停用（保留方法体以备回退）。
 
         findViewById(R.id.battery).setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= 23) {
@@ -284,13 +306,16 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
         hrtfNotchRField.setText(String.valueOf(p.notchR));
     }
 
-    /** 重建下拉：index0=无预设, 1..N=真实预设, N+1=自定义(值为当前生效 EQ)。 */
+    /** 重建下拉：index 0..B-1=内置预设(含全0的"均衡"), B..B+N-1=用户预设, 末位=自定义。 */
     private void refreshEqPresetSpinner(int selectIndex) {
         eqPresetList = EqPresets.parse(Prefs.getEqPresetsRaw(this));
         eqSpinnerLabels.clear();
         eqSpinnerValues.clear();
-        eqSpinnerLabels.add(getString(R.string.eq_preset_none));
-        eqSpinnerValues.add(new float[GraphicEQ.BANDS]); // 全 0
+        for (EqPresets.Builtin b : BUILTINS) {
+            Integer res = BUILTIN_NAME_RES.get(b.nameKey);
+            eqSpinnerLabels.add(res != null ? getString(res) : b.nameKey);
+            eqSpinnerValues.add(b.bands);
+        }
         for (EqPresets.Preset p : eqPresetList) {
             eqSpinnerLabels.add(p.name);
             eqSpinnerValues.add(p.bands);
@@ -300,8 +325,7 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
         eqPresetAdapter.clear();
         eqPresetAdapter.addAll(eqSpinnerLabels);
         eqPresetAdapter.notifyDataSetChanged();
-        // selectIndex<0：自动选中"当前生效 EQ"对应的项（无预设/某预设/自定义），
-        // 避免每次进设置页都错误地停在"无预设"。
+        // selectIndex<0：自动选中"当前生效 EQ"对应的项（内置/用户预设/自定义）。
         if (selectIndex < 0) {
             selectIndex = matchSpinnerIndex(Prefs.getEq(this));
         }
@@ -312,7 +336,7 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
         eqPresetInit = false;
     }
 
-    /** 当前生效 EQ 是否与某下拉项相同；全 0 返回无预设 index 0；找不到返回 -1。 */
+    /** 当前生效 EQ 是否与某下拉项相同（全 0 匹配到内置"均衡" index 0）；找不到返回 -1。 */
     private int matchSpinnerIndex(float[] bands) {
         for (int i = 0; i < eqSpinnerValues.size(); i++) {
             if (sameBands(bands, eqSpinnerValues.get(i))) return i;
@@ -332,6 +356,91 @@ public class SettingsActivity extends androidx.appcompat.app.AppCompatActivity {
         float[] bands = Prefs.getEq(this);
         for (int i = 0; i < GraphicEQ.BANDS; i++) {
             eqFields[i].setText(String.valueOf(bands[i]));
+        }
+    }
+
+    /** 通用滑块绑定：滑块有范围，数字框无范围（超范围时滑块夹边界、数字框保留） */
+    private void bindOneSeek(int seekId, EditText field, float min, float max, int scale) {
+        final android.widget.SeekBar bar = findViewById(seekId);
+        if (bar == null) return;
+        bar.setMax(Math.round((max - min) * scale));
+        field.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s,int a,int b,int c){}
+            public void onTextChanged(CharSequence s,int a,int b,int c){}
+            public void afterTextChanged(android.text.Editable e){
+                if (bar.isPressed()) return;
+                try {
+                    float v = Float.parseFloat(e.toString());
+                    float cl = Math.max(min, Math.min(max, v));
+                    int p = Math.round((cl - min) * scale);
+                    if (bar.getProgress() != p) bar.setProgress(p);
+                } catch (Throwable t) {}
+            }
+        });
+        bar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(android.widget.SeekBar sb,int progress,boolean fromUser){
+                if (!fromUser) return;
+                float v = min + progress / (float) scale;
+                field.setText(scale >= 100 ? String.format(java.util.Locale.US,"%.2f",v)
+                        : String.format(java.util.Locale.US,"%.1f",v));
+            }
+            public void onStartTrackingTouch(android.widget.SeekBar sb){}
+            public void onStopTrackingTouch(android.widget.SeekBar sb){}
+        });
+        field.post(() -> {
+            try {
+                float v = Float.parseFloat(field.getText().toString());
+                float cl = Math.max(min, Math.min(max, v));
+                bar.setProgress(Math.round((cl - min) * scale));
+            } catch (Throwable t) {}
+        });
+    }
+
+    private void bindParamSeeks() {
+        bindOneSeek(R.id.softThresholdSeek, dspSoftThresholdField, 0.1f, 0.99f, 100);
+        bindOneSeek(R.id.bassSeek, bassField, 0f, 1f, 100);
+        bindOneSeek(R.id.maxItdSeek, hrtfMaxItdField, 0.4f, 1.0f, 100);
+        bindOneSeek(R.id.ildSeek, hrtfIldField, 0f, 1f, 100);
+        bindOneSeek(R.id.shadowSeek, hrtfShadowField, 0f, 1f, 100);
+        bindOneSeek(R.id.notchRSeek, hrtfNotchRField, 0.5f, 0.95f, 100);
+    }
+
+    /** EQ 滑块 ↔ 数字框双向绑定。0.5dB 分度（scale=2），范围 ±12dB。 */
+    private void bindEqSeeks() {
+        for (int i = 0; i < GraphicEQ.BANDS; i++) {
+            final android.widget.SeekBar bar = findViewById(EQ_SEEK_IDS[i]);
+            final EditText field = eqFields[i];
+            if (bar == null) continue;
+            bar.setMax(Math.round((GraphicEQ.MAX_DB - GraphicEQ.MIN_DB) * 2)); // 0..48
+            field.addTextChangedListener(new android.text.TextWatcher() {
+                public void beforeTextChanged(CharSequence s,int a,int b,int c){}
+                public void onTextChanged(CharSequence s,int a,int b,int c){}
+                public void afterTextChanged(android.text.Editable e){
+                    if (bar.isPressed()) return;
+                    try {
+                        float v = Float.parseFloat(e.toString());
+                        float clamped = Math.max(GraphicEQ.MIN_DB, Math.min(GraphicEQ.MAX_DB, v));
+                        int p = Math.round((clamped - GraphicEQ.MIN_DB) * 2);
+                        if (bar.getProgress() != p) bar.setProgress(p);
+                    } catch (Throwable t) {}
+                }
+            });
+            bar.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                public void onProgressChanged(android.widget.SeekBar sb,int progress,boolean fromUser){
+                    if (!fromUser) return;
+                    float v = GraphicEQ.MIN_DB + progress / 2f;
+                    field.setText(String.format(java.util.Locale.US, "%.1f", v));
+                }
+                public void onStartTrackingTouch(android.widget.SeekBar sb){}
+                public void onStopTrackingTouch(android.widget.SeekBar sb){}
+            });
+            field.post(() -> {
+                try {
+                    float v = Float.parseFloat(field.getText().toString());
+                    float clamped = Math.max(GraphicEQ.MIN_DB, Math.min(GraphicEQ.MAX_DB, v));
+                    bar.setProgress(Math.round((clamped - GraphicEQ.MIN_DB) * 2));
+                } catch (Throwable t) {}
+            });
         }
     }
 

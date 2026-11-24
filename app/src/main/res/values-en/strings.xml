@@ -2,13 +2,13 @@
 <resources>
     <string name="app_name">SoundOrbit</string>
     <string name="main_title">SoundOrbit</string>
-    <string name="main_subtitle">Turn mono into two-ear orbiting in real time · Made for ASMR, not limited to it</string>
+    <string name="main_subtitle">Add surround to whatever is playing \u2014 music, video, and mono content alike</string>
     <string name="capture_authorized">Audio capture authorized</string>
     <string name="capture_stop">Stop capture</string>
     <string name="capture_unauthorized">Not authorized (tap to authorize)</string>
     <string name="tile_label">SoundOrbit</string>
-    <string name="depth_label">Depth (amplitude, suggested 20)</string>
-    <string name="period_label">Period (seconds, suggested 20)</string>
+    <string name="depth_label">Depth (amplitude)</string>
+    <string name="period_label">Period (seconds)</string>
     <string name="period_random_enable">Random period range (when checked, the period becomes a range and each cycle picks a random value within it)</string>
     <string name="period_random_min">Period lower bound (seconds)</string>
     <string name="period_random_max">Period upper bound (seconds)</string>
@@ -45,13 +45,14 @@
     <string name="engine_native">Lightweight (session 0, zero latency, L/R panning)</string>
     <string name="engine_shizuku">Advanced (capture-based, panning / binaural)</string>
     <string name="channel_label">Surround mode (advanced engine only)</string>
-    <string name="channel_left">Panning · take left → both ears (channel duplication + L/R gain swing, no front/back)</string>
-    <string name="channel_right">Panning · take right → both ears (channel duplication + L/R gain swing, no front/back)</string>
-    <string name="channel_mix">Panning · stereo downmixed to mono → both ears (downmix then swing)</string>
-    <string name="channel_hrtf">Binaural · stereo direct (L and R orbit independently)</string>
-    <string name="channel_hrtf_left">Binaural · take left source (mono orbiting)</string>
-    <string name="channel_hrtf_right">Binaural · take right source (mono orbiting)</string>
-    <string name="channel_hrtf_mix">Binaural · stereo downmixed to mono orbiting (downmix then orbit)</string>
+    <string name="channel_type_label">Surround type</string>
+    <string name="channel_type_pan">Panning (L/R gain swing, no front/back)</string>
+    <string name="channel_type_hrtf">Binaural (spatial rendering, with front/back and elevation)</string>
+    <string name="channel_source_label">Source</string>
+    <string name="channel_src_stereo">Stereo direct (L and R processed independently)</string>
+    <string name="channel_src_mix">Downmix to mono (L and R combined)</string>
+    <string name="channel_src_left">Left channel only (for sources with mismatched L/R)</string>
+    <string name="channel_src_right">Right channel only (for sources with mismatched L/R)</string>
     <string name="hrtf_params">Binaural parameters (rotation uses the "Period" field above; Depth and Ratio have no effect here)</string>
     <string name="hrtf_azimuth">Start azimuth (degrees, 0 front / 90 right / 180 back / 270 left)</string>
     <string name="hrtf_radius">Radius (0 close to head ~ 1 far; smaller = stronger binaural cues)</string>
@@ -85,7 +86,7 @@
     <string name="err_no_audio_permission">Missing system audio settings permission</string>
     <string name="err_unknown">Unknown error</string>
     <string name="notification_failed">Start failed: %s</string>
-    <string name="notification_params">Depth %s  Period %ss  Ratio %s</string>
+    <string name="notification_params">Depth %1$s  Period %2$ss  Ratio %3$s</string>
     <string name="diag_device">Device: </string>
     <string name="diag_effect_running">Effect running: </string>
     <string name="diag_current_params">Current params: depth=</string>
@@ -101,7 +102,7 @@
     <string name="capture_notif_text">For realtime surround processing</string>
     <string name="settings_advanced">Audiophile parameters · HRTF (advanced)</string>
     <string name="settings_advanced_warn">Warning: for audiophiles only. Bad values may break positioning or volume. Use "Reset" if unsure.</string>
-    <string name="settings_advanced_hint">Low-level binaural (HRTF) rendering parameters. Defaults are recommended. Changes apply on returning to the main screen.</string>
+    <string name="settings_advanced_hint">Low-level binaural (HRTF) rendering parameters. Changes apply on returning to the main screen.</string>
     <string name="dsp_toggle">DSP settings (advanced)</string>
     <string name="dsp_sub_output">Output processing · soft limiter</string>
     <string name="dsp_sub_hrtf">HRTF settings (spatial rendering)</string>
@@ -128,6 +129,18 @@
     <string name="eq_preset_deleted">Deleted</string>
     <string name="eq_preset_empty">No presets yet</string>
     <string name="eq_preset_apply">Apply preset (to audio)</string>
+    <string name="eq_builtin_flat">Flat</string>
+    <string name="eq_builtin_bass">Bass Boost</string>
+    <string name="eq_builtin_treble">Treble Boost</string>
+    <string name="eq_builtin_vocal">Vocal Clarity</string>
+    <string name="eq_builtin_podcast">Podcast/Voice</string>
+    <string name="eq_builtin_pop">Pop</string>
+    <string name="eq_builtin_rock">Rock</string>
+    <string name="eq_builtin_hiphop">Hip-Hop/Electronic</string>
+    <string name="eq_builtin_classical">Classical</string>
+    <string name="eq_builtin_loudness">Loudness</string>
+    <string name="eq_builtin_asmr_whisper">ASMR · Whisper</string>
+    <string name="eq_builtin_asmr_tapping">ASMR · Tapping</string>
     <string name="eq_preset_none">No preset (all zero)</string>
     <string name="eq_preset_custom">Custom (unsaved)</string>
     <string name="eq_preset_applied">Applied to audio</string>

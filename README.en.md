@@ -8,16 +8,16 @@
 
 [中文文档](README.md)
 
-> Orbital surround sound, in real time, for whatever your phone is playing — fully on-device, no root, no network.
+> Real-time surround for whatever your phone is playing — fully on-device, no root, no network.
 
-SoundOrbit is an Android realtime surround-sound tool that does all its work on the device. It leaves the source audio untouched and processes it only on the way to your headphones: either sweeping the image between the two ears, or orbiting a sound source around your head.
+SoundOrbit is an Android realtime surround-sound tool that does all its work on the device. It leaves the source audio untouched and processes it only on the way to your headphones: the image can move from side to side, or a sound source can circle around your head.
 
 **Two engines, pick what fits:**
 
 - **Lightweight engine** — attaches the effect directly to the system output mix and modulates the left/right channel gains with an **anti-phase triangle wave** (adjustable depth, period, and side/center time ratio; the period can also be randomized within a range). It never captures or replays audio, so there is no doubling, no echo, and no extra buffering.
 - **Advanced engine** — captures a copy of whatever is currently playing, then renders it into a binaural sound field that moves around your head using **ITD (interaural time difference) + ILD (interaural level difference) + head-shadow low-pass + pinna notch filtering**. Left/right, front/back, and up/down are distinguishable. Adds some processing latency and requires a one-time "record screen/audio" authorization.
 
-**What it's for:** immersive mono ASMR; adding movement to ordinary music; giving streams — live broadcasts, videos you can't be bothered to download — an extra surround dimension. Anything currently playing on the phone works; local files are not required.
+**What it's for:** adding a surround field to anything currently playing on the phone — music, video, or live streams; local files are not required. For example, when a music app doesn't offer surround sound to regular accounts, this can add a layer on the spot; it also works for mono content you want orbiting around you (ASMR, for instance) and for video streams. Uses are not limited to these.
 
 **Privacy & dependencies:** the app declares no `INTERNET` permission, makes no network calls, and ships no networking SDK (dependencies are local libraries only — AndroidX `annotation` / `appcompat` and the Kotlin stdlib). Audio stays on the device throughout — nothing is uploaded, written to disk, or passed to any external service.
 
@@ -52,6 +52,8 @@ SoundOrbit is an Android realtime surround-sound tool that does all its work on 
 | Elevation (°) | -60 to 60, source above or below | Binaural |
 
 > Binaural **source motion** uses only `period + start azimuth + radius + elevation`; depth and ratio have no effect on it (noted in the UI). Output DSP (soft limiter, EQ, bass enhancement) still applies before binaural output.
+>
+> Every parameter has a slider and a number field: the slider covers a common range (depth 0–100, period 1–60 s, ratio 0.1–5, azimuth 0–360°, radius 0–1, elevation −60~60°), while the number field accepts any value (the engine still clamps to safe limits internally).
 
 ### DSP settings (Settings · Advanced)
 
@@ -61,7 +63,7 @@ Collapsed by default under **Settings → DSP settings (advanced)**, containing 
 2. **Graphic equalizer (10 bands)**: 10 band gains and preset management;
 3. **HRTF settings (spatial rendering)**: low-level binaural controls.
 
-These are for fine-tuning — bad values may make audio muffled, distorted, or break positioning. Out-of-range values are clamped and each section has a reset button. Defaults are recommended.
+These are for fine-tuning — bad values may make audio muffled, distorted, or break positioning. Out-of-range values are clamped and each section has a reset button. 
 
 #### Output-processing parameters
 
@@ -82,12 +84,12 @@ Each band's gain ranges ±12 dB (positive boosts, negative cuts).
 
 **Preset behavior** (important):
 
-- The dropdown has three kinds of entries: **No preset (all zero)**, **Custom (unsaved)**, and any presets you saved;
-- **Selecting a preset only fills the input fields as a draft — it does not take effect**; you must tap *Apply preset (to audio)* to write it to the engine and get a confirmation toast;
-- On apply, if the current values differ from the selected preset, the dropdown switches to *Custom (unsaved)* (or *No preset* if all zero) — so after editing preset A you can naturally re-select A from the dropdown to restore its original values;
-- *Save current as new preset*: names and saves the current 10 bands (unlimited count); saving also applies the current values;
-- *Delete current preset*: removes the currently selected saved preset (No preset / Custom entries cannot be deleted);
-- *Reset EQ*: zeros all 10 bands as a draft and switches to *No preset*; still needs Apply to take effect;
+- The dropdown contains **built-in presets** (flat, bass boost, treble boost, vocal clarity, podcast/voice, pop, rock, hip-hop/electronic, classical, loudness, ASMR · whisper, ASMR · tapping), **presets you saved**, and **Custom (unsaved)**. *Flat* is all-zero (no processing);
+- **Selecting a preset only fills the input fields as a draft — it does not take effect**; you must tap *Apply preset (to audio)* to write it to the engine;
+- On apply, if the current values differ from the selected preset, the dropdown switches to *Custom (unsaved)* — so after editing preset A you can naturally re-select A to restore its values;
+- *Save current as new preset*: names and saves the current 10 bands (unlimited count); saving also applies them;
+- *Delete current preset*: removes a preset you saved (built-ins and Custom cannot be deleted);
+- *Reset EQ*: zeros the 10 bands as a draft and switches to the built-in *Flat* preset; still needs Apply;
 - **Leaving Settings without tapping Apply discards the draft — the engine keeps the previously applied values.**
 
 #### HRTF parameters
@@ -99,16 +101,16 @@ Each band's gain ranges ±12 dB (positive boosts, negative cuts).
 | Head-shadow strength | High-frequency attenuation on the far ear, a spatial cue | 0.55 | 0–1 |
 | Pinna notch sharpness | Spectrum-notch bandwidth behind front/back and up/down cues; closer to 1 = narrower and deeper | 0.8 | 0.5–0.95 |
 
-> **When changes apply**: soft-limiter threshold and bass strength save on returning to the main screen; EQ edits are drafts and only take effect after tapping *Apply preset*; HRTF changes apply on returning to the main screen (next frame). All are locked while surround is on. If you mess things up, tap the corresponding reset button.
+> **When changes apply**: soft-limiter threshold and bass strength save on returning to the main screen; EQ edits are drafts and only take effect after tapping *Apply preset*; HRTF changes apply on returning to the main screen (next frame). These can all be changed while surround is on (turning it off first is not required). If you mess things up, tap the corresponding reset button.
 
 ## Usage
 
 1. Headphones or a stereo output device are recommended.
-2. **Lightweight engine**: select the *Lightweight* engine → tap *Enable surround*, or add the *Realtime surround* quick tile. Defaults `20 / 20 / 1` are audible immediately.
-3. **Advanced engine**: select the *Advanced* engine → tap *Authorize audio capture* → allow "record screen/audio" in the dialog → pick one of the seven modes → enable.
+2. **Lightweight engine**: select the *Lightweight* engine → tap the bottom-bar *Enable surround* switch, or add the *Realtime surround* quick tile. Defaults `20 / 20 / 1` are audible immediately.
+3. **Advanced engine**: select the *Advanced* engine → tap *Authorize audio capture* → allow "record screen/audio" in the dialog → choose the **surround type** (pseudo / true) and **source** (stereo direct / downmix to mono / take left / take right) → tap the bottom switch to enable.
 4. For a random period: check *Random period range* below the period field and enter the lower and upper bounds.
-5. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, view/copy diagnostics, and the collapsed *DSP settings (advanced)* panel for output processing and HRTF fine-tuning.
-6. To tune sound: turn surround off → open *DSP settings* → adjust the soft limiter / bass in Output processing, or use the 10-band EQ (tap *Apply preset* to commit changes; multiple custom presets can be saved) → return and re-enable surround. These parameters are locked while running.
+5. Tuning: every parameter has a slider and a number field. Changeable while surround is on: depth, ratio, azimuth, radius, elevation, plus DSP / EQ / HRTF parameters (immediate effect). Period, random range, engine, surround type, and source require stopping surround first.
+6. Settings offers: UI language (follow system / 简体中文 / English), battery-optimization exemption, optional accessibility keep-alive, view/copy diagnostics, and the collapsed *DSP settings (advanced)* panel for output processing, the 10-band EQ (with built-in presets), and HRTF parameters. EQ changes need *Apply preset* to commit.
 
 ## How it works
 
@@ -119,8 +121,12 @@ Each band's gain ranges ±12 dB (positive boosts, negative cuts).
 ## Compatibility & limitations
 
 - Android 10 (API 29)+; `targetSdk 34`.
-- Zero-latency: attached to the system's preferred output thread; calls and low-latency/direct paths are unaffected. On ROMs without session 0 global-effect support, the status shows the startup failure reason.
-- Advanced engine: needs a one-time "record screen/audio" authorization; can only capture apps that allow capture (most music/video apps do by default, some DRM apps don't); works with Bluetooth headphones too; capturing and replaying introduces some latency.
+- **Lightweight engine**: attaches the effect to the system output mix (session 0). Android has deprecated attaching insert effects to the session 0 global output, so ROM support varies — on some ROMs it may not start or may have no effect; startup failures are shown in the status bar. If the Lightweight engine doesn't work on your device, use the Advanced engine.
+- **Advanced engine**: needs a one-time "record screen/audio" authorization; can only capture apps that allow capture (most music/video apps do by default, some DRM apps don't); works with Bluetooth headphones too; capturing and replaying introduces some latency. ROM audio policies differ — if your device has an unusual voice-assistant / ASSISTANT volume behavior, the Advanced engine may produce no sound.
+- **Advanced engine volume handling** (important):
+  1. It's best to **turn the media volume all the way up while surround is off, then enable surround** — the upper bound of the adjustable volume after enabling is determined by the volume before enabling;
+  2. After enabling surround, use the **physical volume keys**. Some in-app volume sliders (e.g. video-site volume bars) can un-mute the media stream that was muted, causing the original sound to overlap with the processed sound (doubling);
+  3. **Pause playback before turning surround off** — media volume is restored when it turns off, so avoid a sudden loud sound hurting your ears.
 - Android's accessibility "mono audio" merges channels at the final output stage, which cancels out the left/right panning — not suitable for this tool.
 
 ## Build
@@ -138,9 +144,9 @@ Just open the project root in Android Studio.
 
 ## Releasing
 
-Push a tag starting with `v` (e.g. `git tag v0.1.3 && git push origin v0.1.3`). `.github/workflows/release.yml` stamps the version, builds a properly signed APK, and creates a GitHub Release with it attached. The signing key is not stored in the repo — CI restores it from repository Secrets (`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`), so releases share one stable signature and users can upgrade in place.
+Push a tag starting with `v` (e.g. `git tag v<version> && git push origin v<version>`). `.github/workflows/release.yml` stamps the version, builds a properly signed APK, and creates a GitHub Release with it attached. The signing key is not stored in the repo — CI restores it from repository Secrets (`SIGN_KEYSTORE_B64` / `SIGN_STORE_PASSWORD` / `SIGN_KEY_ALIAS` / `SIGN_KEY_PASSWORD`), so releases share one stable signature and users can upgrade in place.
 
-Tags follow `v<versionName>` (e.g. `v0.1.3`) consistently so version-identifying tools can recognize releases.
+Tags follow `v<versionName>`  consistently so version-identifying tools can recognize releases.
 
 
 ## Contributing

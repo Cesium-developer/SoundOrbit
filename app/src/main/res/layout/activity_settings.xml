@@ -15,7 +15,7 @@
             android:text="@string/settings_title"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="#263238" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:layout_width="match_parent"
@@ -24,7 +24,7 @@
             android:text="@string/settings_language"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#37474F" />
+            android:textColor="@color/text_primary" />
 
         <Spinner
             android:id="@+id/languageSpinner"
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_battery_desc"
             android:textSize="12sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
 
         <Button
             android:id="@+id/accessibility"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:text="@string/settings_accessibility_desc"
             android:textSize="12sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
 
         <TextView
             android:layout_width="match_parent"
@@ -66,14 +66,14 @@
             android:layout_marginTop="20dp"
             android:text="@string/settings_lock"
             android:textSize="16sp"
-            android:textColor="#263238" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/settings_lock_desc"
             android:textSize="12sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
 
         <Button
             android:id="@+id/diag"
@@ -95,7 +95,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textSize="12sp"
-            android:textColor="#455A64" />
+            android:textColor="@color/text_secondary" />
 
         <TextView
             android:layout_width="match_parent"
@@ -103,14 +103,14 @@
             android:layout_marginTop="24dp"
             android:text="@string/settings_mono"
             android:textSize="16sp"
-            android:textColor="#263238" />
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/settings_mono_desc"
             android:textSize="12sp"
-            android:textColor="#78909C" />
+            android:textColor="@color/text_secondary" />
 
         <Button
             android:id="@+id/dspToggle"
@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/dsp_warn"
                 android:textSize="12sp"
-                android:textColor="#C62828" />
+                android:textColor="@color/text_error" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -140,7 +140,7 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/dsp_hint"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -149,7 +149,7 @@
                 android:text="@string/dsp_sub_output"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#263238" />
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -157,12 +157,17 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/dsp_soft_threshold"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/dspSoftThreshold"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/softThresholdSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -170,7 +175,7 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/dsp_soft_threshold_note"
                 android:textSize="11sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
 
             <Button
                 android:id="@+id/dspReset"
@@ -185,12 +190,17 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/dsp_bass"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/dspBass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/bassSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -198,7 +208,7 @@
                 android:layout_marginTop="2dp"
                 android:text="@string/dsp_bass_note"
                 android:textSize="11sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -207,7 +217,7 @@
                 android:text="@string/dsp_sub_eq"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#263238" />
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -215,183 +225,353 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/dsp_eq_note"
                 android:textSize="11sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
 
+                    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="31.5 Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq0"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq0"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek0"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="63 Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq1"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq1"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek1"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="125 Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq2"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq2"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek2"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="250 Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq3"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq3"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek3"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="500 Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq4"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq4"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek4"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="1k Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq5"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq5"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek5"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="2k Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq6"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:text="4k Hz"
-                    android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq7"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq6"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek6"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:text="4k Hz"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq7"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek7"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="8k Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq8"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq8"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek8"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp">
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:text="16k Hz"
                     android:textSize="12sp"
-                    android:textColor="#78909C" />
-                <EditText
-                    android:id="@+id/eq9"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:textColor="@color/text_secondary" />
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberDecimal|numberSigned"
-                    android:text="0" />
+                    android:orientation="horizontal">
+                    <EditText
+                        android:id="@+id/eq9"
+                        android:layout_width="52dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal|numberSigned"
+                        android:text="0"
+                        android:textSize="14sp" />
+                    <SeekBar
+                        android:id="@+id/eqSeek9"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+                </LinearLayout>
             </LinearLayout>
+        </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
@@ -399,7 +579,7 @@
                 android:layout_marginTop="10dp"
                 android:text="@string/eq_preset_hint"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <Spinner
                 android:id="@+id/eqPresetSpinner"
                 android:layout_width="match_parent"
@@ -444,7 +624,7 @@
                 android:text="@string/dsp_sub_hrtf"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="#263238" />
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -452,12 +632,17 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/hrtf_max_itd"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/hrtfMaxItd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/maxItdSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -465,12 +650,17 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/hrtf_ild"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/hrtfIld"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/ildSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -478,12 +668,17 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/hrtf_shadow"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/hrtfShadow"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/shadowSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -491,12 +686,17 @@
                 android:layout_marginTop="6dp"
                 android:text="@string/hrtf_notch_r"
                 android:textSize="12sp"
-                android:textColor="#78909C" />
+                android:textColor="@color/text_secondary" />
             <EditText
                 android:id="@+id/hrtfNotchR"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
+            <SeekBar
+                android:id="@+id/notchRSeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp" />
 
             <Button
                 android:id="@+id/hrtfReset"

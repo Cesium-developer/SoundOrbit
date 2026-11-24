@@ -86,15 +86,17 @@ public final class HRTFProcessor {
                                float azimuth0, float radius, float elevation, HrtfParams params,
                                int inOffset, int outOffset) {
         if (params == null) params = HrtfParams.defaults();
-        double azimuth = azimuth0 * Math.PI / 180.0;
-        azimuth += 2.0 * Math.PI * rotationPhase;
+        double azimuth = (Double.isFinite(azimuth0) ? azimuth0 : 0.0) * Math.PI / 180.0;
+        azimuth += 2.0 * Math.PI * (Double.isFinite(rotationPhase) ? rotationPhase : 0.0);
         double az = normalizePi(azimuth);
 
-        double el = Math.max(-60.0, Math.min(60.0, elevation)) * Math.PI / 180.0;
+        // NaN/Inf 兜底：Math.max/min 遇 NaN 会传播 NaN，污染 biquad 状态导致持续静音。
+        double elDeg = Double.isFinite(elevation) ? elevation : 0.0;
+        double el = Math.max(-60.0, Math.min(60.0, elDeg)) * Math.PI / 180.0;
         double sinEl = Math.sin(el);
         double cosEl = Math.cos(el);
 
-        float rad = Math.max(0f, Math.min(1f, radius));
+        float rad = Float.isFinite(radius) ? Math.max(0f, Math.min(1f, radius)) : 0.5f;
         float strength = 1f - 0.65f * rad;
 
         // ITD 用分数延迟 + 线性插值，不做整数取整：旋转时不再跳档、无颗粒感。
@@ -183,9 +185,13 @@ public final class HRTFProcessor {
     }
 
     private static double normalizePi(double a) {
-        while (a > Math.PI) a -= 2.0 * Math.PI;
-        while (a < -Math.PI) a += 2.0 * Math.PI;
-        return a;
+        // 有界取模替代循环加减：非有限值一次判定，且不会因大数精度丢失而死循环。
+        if (!Double.isFinite(a)) return 0.0;
+        double twoPi = 2.0 * Math.PI;
+        double r = a % twoPi;
+        if (r > Math.PI) r -= twoPi;
+        else if (r < -Math.PI) r += twoPi;
+        return r;
     }
 
     private short clamp16(float v) {

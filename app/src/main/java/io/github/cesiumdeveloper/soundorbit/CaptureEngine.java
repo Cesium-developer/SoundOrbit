@@ -23,7 +23,8 @@ public final class CaptureEngine {
     public static final int REQ_CAPTURE = 7002;
     private static final int STREAM_ASSISTANT = 11; // 隐藏常量，公开的 AudioManager 未暴露
 
-    // 模式值必须与 spinner 位置一致（最终 7 项）
+    // 模式值：0-6 为历史值保持不变，7 为新增的伪环绕立体声直入。
+    // UI 用"伪/真 + 取源"两个 spinner，经 modeFromSelection() 映射到这些值。
     public static final int MODE_TAKE_LEFT = 0;    // 伪环绕：取左 → 双耳
     public static final int MODE_TAKE_RIGHT = 1;   // 伪环绕：取右 → 双耳
     public static final int MODE_TAKE_MIX = 2;     // 伪环绕：L+R 合成单声道 → 双耳
@@ -31,6 +32,32 @@ public final class CaptureEngine {
     public static final int MODE_HRTF_LEFT = 4;    // 真环绕：取左声道源绕头
     public static final int MODE_HRTF_RIGHT = 5;   // 真环绕：取右声道源绕头
     public static final int MODE_HRTF_MIX = 6;     // 真环绕：L+R 合成单声道绕头
+    public static final int MODE_TAKE_STEREO = 7;  // 伪环绕：立体声直入（L/R 各自摆动，不复制不混合）
+
+    /**
+     * 由 UI 的两个选择映射为内部 mode 值。
+     * @param hrtf true=真环绕；false=伪环绕
+     * @param source 0=立体声直入 1=合成 2=取左 3=取右
+     */
+    public static int modeFromSelection(boolean hrtf, int source) {
+        if (hrtf) {
+            switch (source) {
+                case 0: return MODE_HRTF_STEREO;
+                case 1: return MODE_HRTF_MIX;
+                case 2: return MODE_HRTF_LEFT;
+                case 3: return MODE_HRTF_RIGHT;
+                default: return MODE_HRTF_STEREO;
+            }
+        } else {
+            switch (source) {
+                case 0: return MODE_TAKE_STEREO;
+                case 1: return MODE_TAKE_MIX;
+                case 2: return MODE_TAKE_LEFT;
+                case 3: return MODE_TAKE_RIGHT;
+                default: return MODE_TAKE_STEREO;
+            }
+        }
+    }
 
     private final Context app;
     private MediaProjection projection;
@@ -215,8 +242,8 @@ public final class CaptureEngine {
 
             // 播回用 USAGE_ASSISTANT + CONTENT_TYPE_SPEECH：必须配 SPEECH。
             // 在部分 ROM（如一加 ColorOS / Android 15）上，CONTENT_TYPE_MUSIC + USAGE_ASSISTANT
-            // 会被 audio policy 归到 STRATEGY_MEDIA 的 STREAM_MUSIC 组，导致
-            // setStreamMute(STREAM_MUSIC) 把播回一起静音 -> 完全没声音。
+            // 会被 audio policy 归到 STRATEGY_MEDIA 的 STREAM_MUSIC 组，那样静音媒体流时
+            // 会把播回一起静音 -> 完全没声音。
             // 而 SPEECH + USAGE_ASSISTANT 映射到独立的 AUDIO_STREAM_ASSISTANT，不受影响。
             track = new AudioTrack.Builder()
                     .setAudioAttributes(new AudioAttributes.Builder()
@@ -258,7 +285,16 @@ public final class CaptureEngine {
         } catch (Throwable t) {
             lastError = app.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_start_failed, String.valueOf(t.getMessage()));
             Log.e(TAG, "start failed", t);
-            muteMedia(false);
+            // 完整回滚：异常可能发生在 running=true / worker 已启动之后，
+            // 必须清标志、停线程、释放资源，否则留野线程与占用。
+            running = false;
+            EngineGuard.setCaptureRunning(false);
+            Thread w = worker;
+            worker = null;
+            if (w != null) {
+                try { w.interrupt(); w.join(1000); } catch (InterruptedException ignored) {}
+            }
+            releaseAudioResources();
             return -1;
         }
     }
@@ -364,8 +400,10 @@ public final class CaptureEngine {
 
     /**
      * 静音/恢复媒体 stream，掐掉原声，只留处理后的播回。
-     * 实测（OPPO/ColorOS）：setStreamVolume(MUSIC,0) 会连带掐掉 ASSISTANT 播回；
-     * 而 setStreamMute(MUSIC,true) 只静音 MUSIC、播回照常出声。所以用后者。
+     * 用 setStreamMute（api23 起 deprecated，但语义正确：软静音、不改音量 index、
+     * 进程结束自动解除）。官方推荐的 adjustStreamVolume(ADJUST_MUTE) 是"持久静音"
+     * （跨重启/跨其他 app 改音量），异常退出会把媒体一直静音且无法补救——不适合本场景。
+     * 另：实测 setStreamVolume(MUSIC,0) 会连带掐掉 ASSISTANT 播回，故不用它。
      */
     private void muteMedia(boolean mute) {
         if (audioManager == null) return;
@@ -499,7 +537,15 @@ public final class CaptureEngine {
         try {
             while (running) {
                 int n = rec.read(buf, 0, buf.length);  // 阻塞等数据，不计入处理耗时
-                if (n <= 0) continue;
+                if (n < 0) {
+                    // 负值=AudioRecord 错误（设备路由变化/对象失效等），不能忙等：
+                    // 记录错误后退出循环，由 finally 统一清理，UI 能收到错误状态。
+                    lastError = "录音读取错误(" + n + ")";
+                    EffectState.error = lastError;
+                    Log.e(TAG, lastError);
+                    break;
+                }
+                if (n == 0) continue;  // 0=暂无数据，正常等待下一轮
                 int sampleFrames = n / 2;
 
                 double t = (System.nanoTime() - startNs) / 1_000_000_000.0;
@@ -597,6 +643,7 @@ public final class CaptureEngine {
                         // 双声道合成一个声道后再用伪环绕算法处理
                         l = r = clampSample((l + r) * 0.5f);
                     }
+                    // MODE_TAKE_STEREO：L/R 原样，各自做摆动，不复制不混合（上面三个 if 都不匹配）
                     // 输出用软限幅：short/32768 归一化后处理，再转回 short。
                     buf[i * 2] = outputLimiter.limitToShort((l / 32768f) * linL);
                     buf[i * 2 + 1] = outputLimiter.limitToShort((r / 32768f) * linR);

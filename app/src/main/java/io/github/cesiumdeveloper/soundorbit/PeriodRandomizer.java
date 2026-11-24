@@ -93,8 +93,11 @@ public final class PeriodRandomizer {
         } catch (Throwable t) {
             return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_not_number);
         }
+        if (!Float.isFinite(lo) || !Float.isFinite(hi))
+            return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_min_not_number);
         if (lo <= 0f) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_min_not_positive);
         if (hi <= 0f) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_not_positive);
+        if (hi > 3600f) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_not_number);
         if (hi < lo) return c.getString(io.github.cesiumdeveloper.soundorbit.R.string.err_max_less_than_min);
         return null;
     }

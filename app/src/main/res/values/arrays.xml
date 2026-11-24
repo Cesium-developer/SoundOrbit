@@ -6,13 +6,15 @@
         <item>@string/lang_english</item>
     </string-array>
 
-    <string-array name="channel_modes">
-        <item>@string/channel_left</item>
-        <item>@string/channel_right</item>
-        <item>@string/channel_mix</item>
-        <item>@string/channel_hrtf</item>
-        <item>@string/channel_hrtf_left</item>
-        <item>@string/channel_hrtf_right</item>
-        <item>@string/channel_hrtf_mix</item>
+    <string-array name="channel_types">
+        <item>@string/channel_type_pan</item>
+        <item>@string/channel_type_hrtf</item>
+    </string-array>
+
+    <string-array name="channel_sources">
+        <item>@string/channel_src_stereo</item>
+        <item>@string/channel_src_mix</item>
+        <item>@string/channel_src_left</item>
+        <item>@string/channel_src_right</item>
     </string-array>
 </resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="text_primary">#ECEFF1</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="text_muted">#90A4AE</color>
+    <color name="text_error">#FF8A80</color>
+    <color name="button_text">#FFFFFF</color>
+    <color name="card_bg">#263238</color>
+    <color name="card_stroke">#37474F</color>
+</resources>
